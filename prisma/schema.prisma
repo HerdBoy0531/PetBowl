@@ -13,6 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model Food {
   id              Int      @id @default(autoincrement())
   name            String
@@ -25,4 +26,78 @@ model Food {
   sourceUrl       String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  // relations
+  analysis        GuaranteedAnalysis?
+  ingredients     Ingredient[]
+  proteins        ProteinSource[]
+  carbohydrates   CarbohydrateSource[]
+  vegetables      VegetableSource[]
+
+  @@index([brand])
+  @@index([animalType, lifeStage, sizeCategory])
+}
+
+model GuaranteedAnalysis {
+  id         Int   @id @default(autoincrement())
+  foodId     Int   @unique
+  food       Food  @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  protein    Float?
+  fat        Float?
+  fiber      Float?
+  ash        Float?
+  moisture   Float?
+
+  calcium    Float?
+  phosphorus Float?
+  sodium     Float?
+
+  omega3     Float?
+  omega6     Float?
+}
+
+model Ingredient {
+  id             Int    @id @default(autoincrement())
+  foodId         Int
+  food           Food   @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  ingredientRaw  String
+
+  @@index([foodId])
+}
+
+model ProteinSource {
+  id           Int     @id @default(autoincrement())
+  foodId       Int
+  food         Food    @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  proteinType  String
+  sourceRaw    String?
+  isPrimary    Boolean
+
+  @@index([foodId])
+  @@index([proteinType])
+}
+
+model CarbohydrateSource {
+  id        Int     @id @default(autoincrement())
+  foodId    Int
+  food      Food    @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  carbType  String
+  sourceRaw String?
+
+  @@index([foodId])
+}
+
+model VegetableSource {
+  id            Int     @id @default(autoincrement())
+  foodId        Int
+  food          Food    @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  vegetableType String
+  sourceRaw     String?
+
+  @@index([foodId])
 }
