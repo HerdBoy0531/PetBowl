@@ -13,13 +13,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AnimalType {
+  dog
+  cat
+}
+
+enum LifeStage {
+  puppy
+  adult
+  senior
+}
 
 model Food {
   id              Int      @id @default(autoincrement())
   name            String
   brand           String
-  animalType      String
-  lifeStage       String
+  animalType      AnimalType
+  lifeStage       LifeStage
   sizeCategory    String
   isPrescription  Boolean
   country         String?
@@ -27,7 +37,7 @@ model Food {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // relations
+  //relations
   analysis        GuaranteedAnalysis?
   ingredients     Ingredient[]
   proteins        ProteinSource[]
