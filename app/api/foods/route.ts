@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { AnimalType, LifeStage } from "@prisma/client";
+import { AnimalType, LifeStage, Prisma } from "@prisma/client";
 
 
 export async function POST(req: Request) {
@@ -25,50 +25,117 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
-  const animalTypeParam = searchParams.get("animalType");
-  const animalType =
-  animalTypeParam && Object.values(AnimalType).includes(animalTypeParam as AnimalType)
-    ? (animalTypeParam as AnimalType)
-    : undefined;
-  const lifeStageParam = searchParams.get("lifeStage");
-  const lifeStage =
-  lifeStageParam &&
-  Object.values(LifeStage).includes(lifeStageParam as LifeStage)
-    ? (lifeStageParam as LifeStage)
-    : undefined;
-  const sizeCategory = searchParams.get("sizeCategory");
-  const protein = searchParams.get("protein");
-  const search = searchParams.get("search");
+  // 페이지 분할
+  const page = Math.max(1, Number(searchParams.get("page")) || 1);
+  const limit = Math.max(1, Number(searchParams.get("limit")) || 10);
+  const skip = (page - 1) * limit;
 
-  const foods = await prisma.food.findMany({
-    where: {
+  // sorting
+  const sort = searchParams.get("sort");
+
+  let orderBy: Prisma.FoodOrderByWithRelationInput;;
+
+  if (sort === "name") {
+    orderBy = { name: "asc" };
+  } else if (sort === "brand") {
+    orderBy = { brand: "asc" };
+  } else {
+    orderBy = { id: "desc" }; // default 최신순
+  }
+
+  // 상세 정보 검색
+  const animalTypeParam = searchParams.get("animalType");
+  const animalType = Object.values(AnimalType).find(
+    (v) => v.toLowerCase() === animalTypeParam?.toLowerCase()
+  );
+
+  const lifeStageParam = searchParams.get("lifeStage");
+  const lifeStage = Object.values(LifeStage).find(
+    (v) => v.toLowerCase() === lifeStageParam?.toLowerCase()
+  );
+
+  const sizeCategory = searchParams.get("sizeCategory");
+  const proteinParams = searchParams.get("protein");
+  const proteins = proteinParams?.split(",");
+  const search = searchParams.get("search");
+  
+
+  const where: Prisma.FoodWhereInput = {
       ...(animalType && { animalType }),
       ...(lifeStage && { lifeStage }),
       ...(sizeCategory && { sizeCategory }),
       ...(search && {
         OR: [
-          { name: { contains: search, mode: "insensitive" } },
-          { brand: { contains: search, mode: "insensitive" } },
+          { name: { contains: search, mode: "insensitive" as const } },
+          { brand: { contains: search, mode: "insensitive" as const } },
         ],
       }),
 
-      ...(protein && {
+      // ...(protein && {
+      //   proteins: {
+      //     some: {
+      //       proteinType: protein,
+      //       isPrimary: true,
+      //     },
+      //   },
+      // }),
+      ...(proteins && {
         proteins: {
           some: {
-            proteinType: protein,
+            proteinType: { in: proteins },
             isPrimary: true,
           },
         },
       }),
-    },
+  }
 
+  const total = await prisma.food.count({ where });
+
+  // const foods = await prisma.food.findMany({
+  //   where: {
+  //     ...(animalType && { animalType }),
+  //     ...(lifeStage && { lifeStage }),
+  //     ...(sizeCategory && { sizeCategory }),
+  //     ...(search && {
+  //       OR: [
+  //         { name: { contains: search, mode: "insensitive" } },
+  //         { brand: { contains: search, mode: "insensitive" } },
+  //       ],
+  //     }),
+
+  //     ...(protein && {
+  //       proteins: {
+  //         some: {
+  //           proteinType: protein,
+  //           isPrimary: true,
+  //         },
+  //       },
+  //     }),
+  //   },
+
+  //   include: {
+  //     proteins: {
+  //       where: { isPrimary: true },
+  //       select: { proteinType: true },
+  //     },
+  //   },
+  // });
+
+  const foods = await prisma.food.findMany({
+    where,
+    skip,
+    take: limit,
+    orderBy,
     include: {
       proteins: {
         where: { isPrimary: true },
         select: { proteinType: true },
-      },
-    },
-  });
+      }
+    }
+  })
+
+  console.log("LifeStage enum:", Object.values(LifeStage));
+  console.log("param:", lifeStageParam);
 
   const result = foods.map((food) => ({
     id: food.id,
@@ -82,5 +149,10 @@ export async function GET(req: Request) {
     ),
   }));
 
-  return NextResponse.json(result);
+  return NextResponse.json({
+    data: result,
+    total,
+    page,
+    limit,
+  });
 }
