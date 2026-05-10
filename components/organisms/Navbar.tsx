@@ -19,13 +19,13 @@ export default function Navbar() {
         {/* 중앙 메뉴 영역 */}
         <div className="hidden md:flex items-center gap-8 text-[14px] font-bold text-gray-500 dark:text-gray-400">
           {/* href를 /foods/search로 수정 */}
-          <Link href="/foods/search" className="hover:text-black dark:hover:text-white transition-colors">
+          <Link href="/search" className="hover:text-black dark:hover:text-white transition-colors">
             사료 검색
           </Link>
           <Link href="/compare" className="hover:text-black dark:hover:text-white transition-colors">
             사료 비교
           </Link>
-          <Link href="/nutrition" className="hover:text-black dark:hover:text-white transition-colors">
+          <Link href="/nutrient" className="hover:text-black dark:hover:text-white transition-colors">
             영양성분
           </Link>
           <Link href="/request" className="hover:text-black dark:hover:text-white transition-colors">
