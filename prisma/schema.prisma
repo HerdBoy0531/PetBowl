@@ -13,17 +13,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+// --- Enum 정의 ---
+
+// 반려동물 종류
 enum AnimalType {
   dog
   cat
 }
 
+// 반려동물 생애주기
 enum LifeStage {
   puppy
   adult
   senior
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+}
+
+// 사료 정보
 model Food {
   id              Int      @id @default(autoincrement())
   name            String
@@ -48,6 +65,7 @@ model Food {
   @@index([animalType, lifeStage, sizeCategory])
 }
 
+// 영양성분 정보
 model GuaranteedAnalysis {
   id         Int   @id @default(autoincrement())
   foodId     Int   @unique
@@ -67,6 +85,7 @@ model GuaranteedAnalysis {
   omega6     Float?
 }
 
+// 사료 원재료 정보
 model Ingredient {
   id             Int    @id @default(autoincrement())
   foodId         Int
@@ -77,6 +96,7 @@ model Ingredient {
   @@index([foodId])
 }
 
+// 사료 단백질 원료 정보
 model ProteinSource {
   id           Int     @id @default(autoincrement())
   foodId       Int
@@ -90,6 +110,7 @@ model ProteinSource {
   @@index([proteinType])
 }
 
+// 사료 탄수화물 원료 정보
 model CarbohydrateSource {
   id        Int     @id @default(autoincrement())
   foodId    Int
@@ -101,6 +122,7 @@ model CarbohydrateSource {
   @@index([foodId])
 }
 
+// 사료 야채 원료 정보
 model VegetableSource {
   id            Int     @id @default(autoincrement())
   foodId        Int
@@ -110,4 +132,69 @@ model VegetableSource {
   sourceRaw     String?
 
   @@index([foodId])
+}
+
+// 유저 및 인증 관련 모델
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  nickname      String?   @unique // 가입 시 입력받을 닉네임
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // 암호화된 비밀번호 저장 (bcrypt 사용 예정)
+  role          UserRole  @default(USER) // 기본값은 일반 유저
+  
+  accounts      Account[]
+  sessions      Session[]
+  requests      Request[] // 유저가 작성한 요청사항들
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- 요청 사항 게시판 모델 ---
+
+model Request {
+  id        Int           @id @default(autoincrement())
+  title     String
+  content   String        @db.Text
+  status    RequestStatus @default(PENDING) // 관리자가 업데이트할 상태
+  adminNote String?       @db.Text        // 관리자의 답변이나 메모
+  
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([userId])
 }
