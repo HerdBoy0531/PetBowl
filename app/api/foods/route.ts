@@ -134,6 +134,16 @@ export async function GET(req: Request) {
     }
   })
 
+  // 유저가 검색어(search)를 넣었고, 검색된 사료가 존재한다면 로그를 쌓습니다.
+  if (search && foods.length > 0) {
+    await prisma.foodViewLog.createMany({
+      data: foods.map((f) => ({
+        foodId: f.id,
+        type: "SEARCH", // 검색 결과 노출 로그
+      })),
+    });
+  }
+
   console.log("LifeStage enum:", Object.values(LifeStage));
   console.log("param:", lifeStageParam);
 

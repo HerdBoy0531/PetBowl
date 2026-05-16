@@ -99,7 +99,7 @@ import TextArea from "@/components/atoms/TextArea";
 import Input from "@/components/atoms/Input";
 
 interface RequestFormProps {
-  id?: string;
+  id?: string; // id가 전달되면 자동으로 '수정 모드'로 가동됩니다.
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -107,26 +107,67 @@ interface RequestFormProps {
 export default function RequestForm({ id, onSuccess, onCancel }: RequestFormProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isUpdate = !!id;
 
+  // 🔄 수정 모드일 때, 백엔드로부터 기존 원본 글 데이터 Fetching 바인딩
   useEffect(() => {
     if (isUpdate) {
-      // 안전한 상태 주입 데이터 흐름 유지
-      setTitle("기존 게시글 제목 (수정 불가)");
-      setContent("기존 게시글 상세 내용입니다.");
+      async function getOriginalPost() {
+        try {
+          const res = await fetch(`/api/request/${id}`);
+          if (res.ok) {
+            const data = await res.json();
+            setTitle(data.title);     // 원본 제목 세팅 (수정은 차단되지만 뷰 제공)
+            setContent(data.content); // 원본 내용 세팅
+          }
+        } catch (error) {
+          console.error("원본 데이터를 가져오는데 실패했습니다.", error);
+        }
+      }
+      getOriginalPost();
     }
   }, [id, isUpdate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 🚀 [Submit Handler] 신규 등록 및 수정 전송 분기 처리
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(isUpdate ? "수정 완료:" : "등록 완료:", { title, content });
-    onSuccess();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    
+    // 수정 모드일 때는 PATCH, 신규 작성일 때는 POST 주소를 동적 채택
+    const apiUrl = isUpdate ? `/api/request/${id}` : "/api/request";
+    const apiMethod = isUpdate ? "PATCH" : "POST";
+    
+    // PATCH 보안 명세에 맞춰 수정 모드 시 content만 페이로드에 적재
+    const payload = isUpdate ? { content } : { title, content };
+
+    try {
+      const res = await fetch(apiUrl, {
+        method: apiMethod,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        alert(isUpdate ? "성공적으로 수정되었습니다." : "요청사항이 안전하게 등록되었습니다.");
+        onSuccess();
+      } else {
+        const errorData = await res.json();
+        alert(errorData.message || "작업 처리 중 오류가 발생했습니다.");
+      }
+    } catch (error) {
+      console.error("API 전송 에러:", error);
+      alert("서버 연결에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="max-w-2xl mx-auto p-6 md:p-8 bg-white border border-zinc-100 rounded-3xl shadow-sm animate-fade-in w-full">
       
-      {/* 헤더 타이틀 리터칭 */}
       <div className="mb-8">
         <h2 className="text-xl md:text-2xl font-bold tracking-tight text-black">
           {isUpdate ? "요청사항 수정하기" : "새로운 요청사항 작성"}
@@ -142,6 +183,7 @@ export default function RequestForm({ id, onSuccess, onCancel }: RequestFormProp
           <Input
             name="title"
             value={title}
+            // 🔒 F12 우회 방어 상태 락 유지: 수정 모드가 아닐 때만 작동
             onChange={(e) => !isUpdate && setTitle(e.target.value)}
             readOnly={isUpdate}
             placeholder="제목을 입력해 주세요"
@@ -175,6 +217,7 @@ export default function RequestForm({ id, onSuccess, onCancel }: RequestFormProp
             type="button" 
             onClick={onCancel} 
             variant="secondary" 
+            disabled={isSubmitting}
             className="text-xs py-2.5 px-5"
           >
             취소
@@ -182,9 +225,10 @@ export default function RequestForm({ id, onSuccess, onCancel }: RequestFormProp
           <Button
             type="submit"
             variant="primary"
+            disabled={isSubmitting}
             className="text-xs py-2.5 px-5"
           >
-            {isUpdate ? "수정 완료" : "작성 완료"}
+            {isSubmitting ? "전송 중..." : isUpdate ? "수정 완료" : "작성 완료"}
           </Button>
         </div>
       </form>

@@ -60,6 +60,7 @@ model Food {
   proteins        ProteinSource[]
   carbohydrates   CarbohydrateSource[]
   vegetables      VegetableSource[]
+  logs FoodViewLog[]
 
   @@index([brand])
   @@index([animalType, lifeStage, sizeCategory])
@@ -120,6 +121,17 @@ model CarbohydrateSource {
   sourceRaw String?
 
   @@index([foodId])
+}
+
+model FoodViewLog {
+  id        Int      @id @default(autoincrement())
+  foodId    Int
+  food      Food     @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  type      String   @default("VIEW")
+  createdAt DateTime @default(now()) // 조회된 시간
+
+  @@index([foodId])
+  @@index([createdAt]) // 기간 검색 성능 최적화를 위한 인덱스
 }
 
 // 사료 야채 원료 정보
