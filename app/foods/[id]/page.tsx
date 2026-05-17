@@ -101,165 +101,124 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import Button from "@/components/atoms/Button";
+import FoodDetailReport from "@/components/organisms/FoodDetailReport";
+import PriceActionCard from "@/components/organisms/PriceActionCard";
+import { useCompareStore } from "@/store/useCompareStore"; // 💡 Zustand 전역 스토어 수입
+
+interface NutrientAnalysis {
+  label: string;
+  value: number;
+  unit: string;
+}
+
+interface FoodDetailData {
+  id: string;
+  name: string;
+  brand: string;
+  animalType: string;
+  lifeStage: string;
+  sizeCategory: string;
+  mainProtein: string;
+  price: string;
+  weight: string;
+  calories: string;
+  description: string;
+  ingredients: string;
+  analysis: NutrientAnalysis[];
+}
 
 export default function FoodDetailPage() {
   const { id } = useParams();
   const router = useRouter();
 
-  // 더미 데이터: 사료 상세 정보 (실제 데이터베이스 모델 기준 구조)
-  const foodDetail = {
-    id: id,
-    name: "그레인프리 치킨 & 칠면조 어덜트",
-    brand: "오리젠 (Orijen)",
-    animalType: "강아지 (Dog)",
-    lifeStage: "성견 (Adult)",
-    mainProtein: "닭고기, 칠면조, 닭 간",
-    price: "45,000원",
-    weight: "1.8kg",
-    calories: "3,860 kcal/kg",
-    description: "곡물을 전혀 사용하지 않고 신선한 통닭고기와 칠면조육을 주원료로 하여 반려동물의 생물학적 특성에 맞춘 고단백 가공 사료입니다.",
-    // 등록 성분 비율 데이터
-    analysis: [
-      { label: "조단백질", value: 38, target: 25, unit: "% 이상" },
-      { label: "조지방", value: 18, target: 12, unit: "% 이상" },
-      { label: "조섬유", value: 5, target: 4, unit: "% 이하" },
-      { label: "조회분", value: 9, target: 8, unit: "% 이하" },
-      { label: "수분", value: 12, target: 10, unit: "% 이하" },
-    ],
-    ingredients: "신선한 닭고기(25%), 건조 칠면조육(15%), 신선한 닭 간(6%), 신선한 통청어(5%), 탈수 닭고기(4%), 완두콩, 렌즈콩, 신선한 통달걀(4%), 병아리콩, 신선한 치킨 오일, 호박, 크랜베리, 블루베리, 로즈마리 추출물.",
+  // 🔄 1. 유저님의 실제 스토어 명세에 맞춰 selectedFoods와 addFood를 정확히 매칭하여 수확합니다.
+  const { selectedFoods, addFood } = useCompareStore();
+
+  const [food, setFood] = useState<FoodDetailData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+
+    async function fetchFoodDetail() {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/foods/${id}`, { cache: "no-store" });
+        if (res.ok) {
+          const result = await res.json();
+          setFood(result);
+        } else {
+          alert("존재하지 않거나 삭제된 사료 정보입니다.");
+          router.push("/search");
+        }
+      } catch (error) {
+        console.error("사료 상세 조회 실패:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchFoodDetail();
+  }, [id]);
+
+  // 💡 2. [비교 슬롯 추가] 핸들러 리터칭 (스토어 인터페이스 규격 변환 레이어 가동)
+  const handleAddCompareSlot = () => {
+    if (!food) return;
+
+    // 💡 핵심 교정: 스토어의 CompareFood 규격(nutrients, value: string)에 일치하도록 맵핑 조립
+    const foodToStore = {
+      id: Number(food.id),
+      name: food.name,
+      brand: food.brand,
+      nutrients: food.analysis.map((item) => ({
+        label: item.label,
+        // 숫자와 단위를 끈끈하게 결합하여 스토어가 원하는 'string' 타입으로 변환 (ex: "38% 이상")
+        value: `${item.value}${item.unit}`, 
+      })),
+    };
+
+    // Zustand 스토어의 캡슐화 로직으로 전송 및 성공 여부 확인
+    const success = addFood(foodToStore);
+
+    if (success) {
+      alert(`[${food.brand}] ${food.name}\n사료 비교 바구니에 정상 장착되었습니다!`);
+    } else {
+      // 스토어 내부 분기(중복이거나 2개 초과)일 때 예외 안내 처리
+      alert("이미 담긴 사료이거나 비교 슬롯(최대 2개)이 꽉 찼습니다.\n비교 페이지나 우측 독 위젯에서 비워주세요.");
+    }
   };
 
+  if (isLoading) {
+    return (
+      <div className="py-40 text-center text-zinc-400 font-light text-sm animate-pulse">
+        데이터베이스에서 정밀 영양 분석표를 파싱하는 중...
+      </div>
+    );
+  }
+
+  if (!food) return null;
+  console.log("food", food);
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-fade-in">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-fade-in w-full">
       
-      {/* LEFT COLUMN: 사료 메인 디테일 리포트 (2개 슬롯 차지) */}
-      <div className="lg:col-span-2 space-y-6">
-        
-        {/* Slot 1: 기본 타이틀 정보 카드 */}
-        <section className="bg-white border border-zinc-100 p-6 md:p-8 rounded-3xl shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs bg-zinc-100 text-zinc-700 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider">
-              {foodDetail.brand}
-            </span>
-            <span className="text-sm text-zinc-400 font-light">
-              ID: #{foodDetail.id}
-            </span>
-          </div>
-          
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black">
-            {foodDetail.name}
-          </h1>
-          
-          <p className="text-sm text-zinc-500 font-light leading-relaxed">
-            {foodDetail.description}
-          </p>
-
-          {/* 주요 스펙 태그 랙 */}
-          <div className="flex flex-wrap gap-2 pt-2">
-            <span className="text-xs bg-[#FDFCF0] border border-zinc-200/60 text-zinc-700 px-3 py-1 rounded-xl">
-              🎯 {foodDetail.animalType}
-            </span>
-            <span className="text-xs bg-[#FDFCF0] border border-zinc-200/60 text-zinc-700 px-3 py-1 rounded-xl">
-              ⏳ {foodDetail.lifeStage}
-            </span>
-            <span className="text-xs bg-[#FDFCF0] border border-zinc-200/60 text-zinc-700 px-3 py-1 rounded-xl">
-              🥩 주단백질: {foodDetail.mainProtein}
-            </span>
-          </div>
-        </section>
-
-        {/* Slot 2: 등록성분량 분석 시각화 판넬 (오가닉 프로그레스 바) */}
-        <section className="bg-white border border-zinc-100 p-6 md:p-8 rounded-3xl shadow-sm space-y-6">
-          <div>
-            <h3 className="text-base font-bold text-black tracking-tight">영양 성분 등록성분량</h3>
-            <p className="text-xs text-zinc-400 mt-1">사료 포장지에 표기된 정식 보증 성분 비율입니다.</p>
-          </div>
-
-          <div className="space-y-4">
-            {foodDetail.analysis.map((item, idx) => (
-              <div key={idx} className="space-y-1.5">
-                <div className="flex justify-between items-end text-xs md:text-sm">
-                  <span className="font-medium text-zinc-700">{item.label}</span>
-                  <span className="font-bold text-black">
-                    {item.value}{item.unit}
-                  </span>
-                </div>
-                {/* 미니멀 오가닉 스타일 바 디자인 */}
-                <div className="w-full h-3 bg-zinc-100 rounded-full overflow-hidden relative shadow-inner">
-                  <div 
-                    className="h-full bg-black rounded-full transition-all duration-500" 
-                    style={{ width: `${Math.min(item.value * 2, 100)}%` }} 
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Slot 3: 사용 원료성분 전체 명세 */}
-        <section className="bg-white border border-zinc-100 p-6 md:p-8 rounded-3xl shadow-sm space-y-4">
-          <h3 className="text-base font-bold text-black tracking-tight">사용 원료 전체 성분</h3>
-          <div className="p-4 md:p-5 bg-zinc-50/50 border border-zinc-100 rounded-2xl">
-            <p className="text-sm text-zinc-600 font-light leading-relaxed tracking-wide">
-              {foodDetail.ingredients}
-            </p>
-          </div>
-          <p className="text-[11px] text-zinc-400 font-light">
-            * 원료 배합 비율은 제조사 사정에 따라 일부 변경될 수 있습니다.
-          </p>
-        </section>
+      {/* 왼쪽 리포트 판넬 */}
+      <div className="lg:col-span-2">
+        <FoodDetailReport data={food} />
       </div>
 
-      {/* RIGHT COLUMN: 가성비 요약 및 즉시 비교 액션 스티커 바 (1개 슬롯 차지) */}
-      <aside className="space-y-4 lg:sticky lg:top-24">
-        
-        {/* 가격 정보 랙 */}
-        <div className="bg-white border border-zinc-100 p-6 rounded-3xl shadow-sm space-y-4">
-          <div className="border-b border-zinc-50 pb-3">
-            <span className="text-xs text-zinc-400 font-light">PetBowl 권장 소비자 가격</span>
-            <div className="text-2xl font-black text-black mt-1">
-              {foodDetail.price}
-            </div>
-          </div>
-
-          <div className="space-y-2 text-xs text-zinc-500 font-light">
-            <div className="flex justify-between">
-              <span>포장 중량</span>
-              <span className="text-zinc-800 font-medium">{foodDetail.weight}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>총 칼로리</span>
-              <span className="text-zinc-800 font-medium">{foodDetail.calories}</span>
-            </div>
-          </div>
-
-          {/* 제어 인터랙션 버튼 세트 */}
-          <div className="space-y-2 pt-4">
-            <Button variant="primary" fullWidth className="py-3 text-sm">
-              비교 슬롯에 추가하기
-            </Button>
-            <Button 
-              variant="outline" 
-              fullWidth 
-              onClick={() => router.push("/search")}
-              className="py-3 text-sm"
-            >
-              목록으로 돌아가기
-            </Button>
-          </div>
-        </div>
-
-        {/* 미니 가이드 박스 */}
-        <div className="bg-[#FDFCF0] border border-zinc-200/60 p-5 rounded-2xl text-center">
-          <p className="text-xs text-zinc-500 font-light leading-relaxed">
-            🌿 영양 성분이 우리 아이에게 맞는지 확인하고 싶다면 비교 슬롯에 추가하여 다른 사료와 직접 대조해 보세요.
-          </p>
-        </div>
-
-      </aside>
+      {/* 우측 가격 및 제어 랙 */}
+      <div className="lg:sticky lg:top-24">
+        <PriceActionCard 
+          price={food.price}
+          weight={food.weight}
+          calories={food.calories}
+          onAddCompare={handleAddCompareSlot} // 튜닝된 스토어 액션 핸들러 주입
+          onGoBack={() => router.push("/search")}
+        />
+      </div>
 
     </div>
   );

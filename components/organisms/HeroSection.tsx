@@ -79,7 +79,7 @@ export default function HeroSection() {
         <div className="pt-4 flex justify-center">
           <Button 
             variant="primary" 
-            onClick={() => router.push("/foods")}
+            onClick={() => router.push("/search")}
             className="text-base px-8 py-3.5 shadow-md"
           >
             사료 보러가기
