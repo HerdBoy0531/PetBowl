@@ -39,58 +39,77 @@
 
 "use client";
 
-import Button from "@/components/atoms/Button";
-import Checkbox from "@/components/atoms/Checkbox";
+import { useRouter } from "next/navigation";
 
 interface FoodResultItemProps {
+  id: number;
   name: string;
+  brand: string;
   details: string;
-  onCheck: (checked: boolean) => void;
-  disabled?: boolean;
-  checked?: boolean; // 선택 상태 일치를 위해 추가를 권장합니다.
+  mainProtein: string[];
+  isAdded: boolean;       // 💡 현재 비교 바구니에 담겼는지 여부
+  onToggleAdd: () => void; // 💡 추가/해제 토글 핸들러
+  isMaxCapacity: boolean;  // 💡 이미 2개가 꽉 찼는지 여부
 }
 
-export default function FoodResultItem({ 
-  name, 
-  details, 
-  onCheck, 
-  disabled = false,
-  checked = false
+export default function FoodResultItem({
+  id,
+  name,
+  brand,
+  details,
+  mainProtein,
+  isAdded,
+  onToggleAdd,
+  isMaxCapacity,
 }: FoodResultItemProps) {
+  const router = useRouter();
+
+  // 이미 2개가 꽉 찼고, 현재 아이템은 선택되지 않았다면 버튼만 잠금 처리
+  const buttonDisabled = isMaxCapacity && !isAdded;
+
   return (
-    <div className={`
-      flex items-center border-b border-zinc-100 bg-white 
-      transition-colors last:border-b-0
-      /* 비활성화 상태일 때 행 전체를 은은하게 톤다운 */
-      ${disabled ? "opacity-60" : "hover:bg-zinc-50/60"}
-    `}>
+    <div className="flex items-center justify-between p-4 md:p-5 bg-white hover:bg-zinc-50/50 transition-colors w-full gap-4">
       
-      {/* 1. 체크박스 영역: 연한 zinc 경계선 매칭 */}
-      <div className="w-1/3 p-4 border-r border-zinc-100 flex items-center">
-        {/* 누락되었던 체크 로직과 disabled 원자를 바인딩합니다. */}
-        <Checkbox 
-          label={name} 
-          checked={checked}
-          disabled={disabled}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onCheck(e.target.checked)}
-        />
+      {/* 🖱️ 왼쪽 영역: 클릭 시 해당 사료의 진짜 상세 페이지로 고속 점프 */}
+      <div 
+        onClick={() => router.push(`/foods/${id}`)}
+        className="flex-1 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 cursor-pointer group"
+      >
+        {/* 브랜드 라벨 배지 */}
+        <span className="text-[11px] font-bold tracking-wider text-zinc-400 uppercase bg-zinc-100 px-2 py-0.5 rounded w-fit shrink-0">
+          {brand}
+        </span>
+        
+        {/* 💡 요구사항 6번: 제어 상태와 무관하게 글자색은 항상 선명한 text-zinc-800 고정 */}
+        <div className="space-y-0.5">
+          <h4 className="text-sm md:text-base font-semibold text-zinc-800 group-hover:text-black group-hover:underline underline-offset-4 decoration-zinc-300">
+            {name}
+          </h4>
+          <p className="text-xs text-zinc-400 font-light">
+            {details} · {mainProtein.map(p => `🥩 ${p}`).join(" ")}
+          </p>
+        </div>
       </div>
 
-      {/* 2. 상세 텍스트 영역: 미니멀 오가닉 감성의 얇고 세련된 서체 */}
-      <div className="flex-1 p-4 text-xs md:text-sm text-zinc-500 font-light tracking-wide">
-        {details}
-      </div>
-
-      {/* 3. 추가 버튼 영역: 커스텀 Button의 속성을 그대로 활용 */}
-      <div className="p-4">
-        <Button 
-          variant={disabled ? "secondary" : "outline"} 
-          disabled={disabled}
-          className="text-xs px-4 py-1.5 rounded-xl shadow-none"
-        >
-          {checked ? "선택됨" : "추가"}
-        </Button>
-      </div>
+      {/* ➕ 오른쪽 영역: 비교함 추가 제어 단추 가판대 */}
+      <button
+        disabled={buttonDisabled}
+        onClick={(e) => {
+          e.stopPropagation(); // 부모 상세페이지 이동 버블링 링크 차단
+          onToggleAdd();
+        }}
+        className={`
+          text-xs font-medium px-4 py-2 rounded-xl transition-all tracking-tight shrink-0 border
+          ${isAdded 
+            ? "bg-zinc-900 text-white border-zinc-900 active:scale-95" 
+            : buttonDisabled
+            ? "bg-zinc-50 text-zinc-300 border-zinc-200 cursor-not-allowed"
+            : "bg-white text-zinc-700 border-zinc-200 hover:border-zinc-400 active:scale-95"
+          }
+        `}
+      >
+        {isAdded ? "선택됨" : "추가"}
+      </button>
 
     </div>
   );
