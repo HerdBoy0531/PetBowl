@@ -54,7 +54,7 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import Button from "@/components/atoms/Button"; // 어제 수정한 미니멀 오가닉 버튼
+import Button from "@/components/atoms/Button";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -64,11 +64,11 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
         
         {/* 1. 로고 영역 */}
-        <Link href="/" className="text-2xl font-black text-black tracking-tight">
+        <Link href="/" className="text-2xl font-black text-black tracking-tight select-none">
           PetBowl
         </Link>
 
-        {/* 2. 중앙 메뉴 영역 (미니멀 오가닉: 연한 zinc 글자색, 호버 시 검정) */}
+        {/* 2. 중앙 메뉴 영역 (미니멀 오가닉 수치 동기화) */}
         <div className="hidden md:flex items-center gap-8 font-medium text-zinc-600">
           <Link href="/search" className="hover:text-black transition-colors">
             사료 검색
@@ -76,7 +76,8 @@ export default function Navbar() {
           <Link href="/compare" className="hover:text-black transition-colors">
             사료 비교
           </Link>
-          <Link href="/nutrient" className="hover:text-black transition-colors">
+          {/* 💡 [보너스 케어] 404 방지를 위해 기존 /nutrient 뒤에 's'를 붙여 연동을 마감합니다. */}
+          <Link href="/nutrients" className="hover:text-black transition-colors">
             영양성분
           </Link>
           <Link href="/request" className="hover:text-black transition-colors">
@@ -87,30 +88,39 @@ export default function Navbar() {
         {/* 3. 우측 인증/유저 상태 영역 */}
         <div className="flex items-center gap-4">
           {status === "loading" ? (
-            // 세션 로딩 중 스켈레톤 UI
             <div className="w-16 h-8 bg-zinc-100 animate-pulse rounded-xl" />
           ) : session ? (
             // A. 로그인 완료 상태
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-zinc-700 font-medium">
-                <strong className="text-black font-semibold">
-                  {session.user?.nickname || session.user?.name}
-                </strong> 님
-              </span>
+            <div className="flex items-center gap-3 md:gap-4">
               
-              {/* 관리자(ADMIN)일 경우 표시되는 왕관 배지 */}
+              {/* 💡 [교정 1] 유저 이름을 클릭하면 마이페이지로 즉시 라우팅 (오가닉 호버 언더라인 이식) */}
+              <Link 
+                href="/mypage" 
+                className="text-sm text-zinc-600 font-medium group transition-colors shrink-0"
+              >
+                <strong className="text-black font-semibold group-hover:text-zinc-600 group-hover:underline underline-offset-4 transition-all">
+                  {session.user?.nickname || session.user?.name}
+                </strong> 집사님
+              </Link>
+              
+              {/* 관리자(ADMIN) 배지 */}
               {session.user?.role === "ADMIN" && (
-                <span className="text-[10px] bg-zinc-900 text-white px-2 py-0.5 rounded-md font-bold tracking-wider">
+                <span className="text-[10px] bg-zinc-900 text-white px-2 py-0.5 rounded-md font-bold tracking-wider select-none shrink-0">
                   ADMIN
                 </span>
               )}
               
-              <Button variant="outline" onClick={() => signOut({ callbackUrl: "/" })}>
+              {/* 💡 [교정 2] 로그아웃 버튼의 패딩과 폰트를 한 단계 낮춰 시각적 조화를 성취합니다. */}
+              <Button 
+                variant="outline" 
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="px-3 py-1.5 text-sm rounded-xl font-normal border-zinc-200 text-zinc-500 hover:text-black hover:border-zinc-400 shrink-0 shadow-none"
+              >
                 로그아웃
               </Button>
             </div>
           ) : (
-            // B. 로그아웃 상태 (일반 상태)
+            // B. 로그아웃 상태
             <div className="flex items-center gap-2">
               <Link href="/login">
                 <Button variant="outline">로그인</Button>

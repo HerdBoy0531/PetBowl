@@ -24,39 +24,89 @@
 // }
 
 
+// // components/molecules/RequestRow.tsx (구조 이해를 돕기 위한 예시)
+// "use client";
+
+// import { useSession } from "next-auth/react";
+// import RequestStatusBadge from "@/components/molecules/RequestStatusBadge"; // 배지 분자 수입
+
+// export default function RequestRow({ item }: any) {
+//   const { data: session } = useSession();
+//   const user = session?.user as any;
+  
+//   // 현재 로그인한 집사가 ADMIN 권한을 갖고 있는지 스캔
+//   const isAdmin = user?.role === "ADMIN";
+
+//   return (
+//     <div className="grid grid-cols-4 items-center py-4 border-b border-zinc-100">
+//       <span className="text-sm font-light text-zinc-400 font-mono">{item.id}</span>
+//       <span className="text-sm font-medium text-zinc-800 truncate">{item.title}</span>
+//       <span className="text-xs font-light text-zinc-400">{item.createdAt}</span>
+      
+//       {/* 💡 이 구역에 새로 만든 하이브리드 어드민 배지를 바인딩합니다! */}
+//       <div>
+//         <RequestStatusBadge 
+//           requestId={item.id} 
+//           currentStatus={item.status} // ex: "PENDING"
+//           isAdmin={isAdmin} 
+//         />
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import RequestStatusBadge from "@/components/molecules/RequestStatusBadge";
 
 interface RequestRowProps {
-  no: number;
-  content: string;
-  date: string;
+  id: number;
+  title: string;
+  status: string;
+  createdAt: string | Date;
 }
 
-export default function RequestRow({ no, content, date }: RequestRowProps) {
-  const router = useRouter();
+export default function RequestRow({ id, title, status, createdAt }: RequestRowProps) {
+  const { data: session } = useSession();
+  const user = session?.user as any;
+  const isAdmin = user?.role === "ADMIN";
 
   return (
-    <tr 
-      onClick={() => router.push(`/request/${no}`)} // ✅ 행 클릭 시 상세 페이지 이동 로직 보존
-      // 미니멀 오가닉 포인트: 투박한 검정 테두리를 지우고 부드러운 가로선(border-zinc-100) 및 은은한 호버 매칭
-      className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50/50 cursor-pointer transition-colors group"
-    >
-      {/* 1. 번호 영역: 답답한 border-r-2 제거, 차분한 모노톤 숫자로 세련미 가미 */}
-      <td className="p-4 text-center text-zinc-400 font-mono text-xs md:text-sm w-20">
-        {no}
-      </td>
+    // 💡 [공간 재배치 2] 부모 헤더 기둥과 완전히 일치하는 너비 배열을 투입해 수직 붕괴를 영구 방지합니다.
+    <div className="grid grid-cols-[60px_1fr_120px_100px] items-center py-4 text-zinc-800 border-b border-zinc-100 last:border-b-0 w-full gap-4">
       
-      {/* 2. 내용 영역: 호버 시 글자색이 진해지며 부드러운 zinc 밑줄이 생기는 감성 디테일 */}
-      <td className="p-4 text-left text-zinc-800 font-medium text-xs md:text-sm group-hover:text-black group-hover:underline decoration-zinc-300 underline-offset-4 transition-colors">
-        {content}
-      </td>
+      {/* 1. 번호 (딱 60px 공간만 할당받아 콤팩트화) */}
+      <span className="text-sm font-light text-zinc-400 font-mono">
+        {id}
+      </span>
+
+      {/* 2. 타이틀 (나머지 광활한 공간 1fr를 다 먹어 길게 출력 가능) */}
+      <span className="text-sm font-medium text-zinc-900 truncate pr-2">
+        {title}
+      </span>
+
+      {/* 3. 작성일자 (안정적인 120px 휠 안착) */}
+      <span className="text-xs font-light text-zinc-400">
+        {new Date(createdAt).toLocaleDateString("ko-KR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        })}
+      </span>
       
-      {/* 3. 작성일자 영역: 헤더 라인에 맞춰 정갈하게 우측 정렬(text-right) 배치 */}
-      <td className="p-4 text-right text-zinc-400 font-light text-xs md:text-sm w-40">
-        {date}
-      </td>
-    </tr>
+      {/* 4. 상태 배지 (100px 랙 안에서 정중앙 정렬 유도) */}
+      <div className="shrink-0 flex justify-center">
+        <RequestStatusBadge 
+          requestId={id} 
+          currentStatus={status} 
+          isAdmin={isAdmin} 
+        />
+      </div>
+
+    </div>
   );
 }
