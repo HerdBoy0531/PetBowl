@@ -55,22 +55,27 @@ import FilterRow from "@molecules/FilterRow";
 interface SearchFilterCardProps {
   filters: {
     search: string;
-    brand: string;          // 제조사 추가 수입선 확보
+    brandKo: string;        // ⭐️ 변경: brand에서 brandKo 형태로 동기화
     animalType: string;
-    isPrescription: string; // 사료종류 추가 수입선 확보
+    isPrescription: string;
     sizeCategory: string;
-    lifeStage: string;
-    proteins: string;
+    lifeStage: string;      // 확장된 'all' 단계 자동 수용
+    proteins: string;       // 주단백질원
+    kibbleSize: string;     // 🆕 추가: 키블크기
+    allergies: string;      // 🆕 추가: 알레르기 케어
+    certifications: string; // 🆕 추가: 인증여부
   };
   onFilterChange: (newFilters: Record<string, string>) => void;
 }
 
 interface FilterMeta {
-  brands: string[];
+  brands: { ko: string; en: string }[]; // ⭐️ 변경: {ko, en} 구조 대응
   animals: { value: string; label: string }[];
   types: { value: string; label: string }[];
   sizes: string[];
   stages: { value: string; label: string }[];
+  allergies: { value: string; label: string }[];       // 🆕 추가: 메타 명세 대응
+  certifications: { value: string; label: string }[];  // 🆕 추가: 메타 명세 대응
 }
 
 export default function SearchFilterCard({ filters, onFilterChange }: SearchFilterCardProps) {
@@ -83,7 +88,7 @@ export default function SearchFilterCard({ filters, onFilterChange }: SearchFilt
         const res = await fetch("/api/foods/meta");
         if (res.ok) setMeta(await res.json());
       } catch (e) {
-        console.error(e);
+        console.error("Filter Card Fetch Meta Error:", e);
       } finally {
         setIsLoading(false);
       }
@@ -92,24 +97,31 @@ export default function SearchFilterCard({ filters, onFilterChange }: SearchFilt
   }, []);
 
   if (isLoading || !meta) {
-    return <div className="py-8 text-center text-xs text-zinc-400 font-light bg-white border border-zinc-100 rounded-2xl shadow-sm">사료 다중 검색 엔진 부팅 중...</div>;
+    return (
+      <div className="py-8 text-center text-xs text-zinc-400 font-light bg-white border border-zinc-100 rounded-2xl shadow-sm">
+        사료 다중 검색 엔진 부팅 중...
+      </div>
+    );
   }
 
-  // 💡 헬퍼 유틸: "A,B,C" 형태의 주소창 스트링을 깔끔하게 꺼내기 편한 ['A','B','C'] 배열로 변환 (빈값이면 빈배열)
+  // 💡 헬퍼 유틸: "A,B,C" 형태의 콤마 분리 스트링을 ['A','B','C'] 배열로 변환
   const toArray = (str: string) => (str ? str.split(",") : []);
+
+  // 🆕 사료 임시 키블 크기 고정 옵션 풀 (백엔드 파싱 데이터 규격 동기화용)
+  const kibbleSizeOptions = ["0.5mm 이하", "0.6mm~0.8mm", "0.9mm~1.1mm", "1.2mm 이상"];
 
   return (
     <section className="bg-white text-black border border-zinc-100 rounded-2xl overflow-hidden mb-8 shadow-sm animate-fade-in">
       
-      {/* 1. 제조사 동적 다중 필터 */}
+      {/* 1. 제조사 동적 다중 필터 (brandKo 맵핑 및 한글 노출) */}
       <FilterRow
         label="제조사"
-        options={meta.brands}
-        selectedValues={toArray(filters.brand)}
-        onChange={(arr) => onFilterChange({ brand: arr.join(",") })}
+        options={meta.brands.map((b) => b.ko)}
+        selectedValues={toArray(filters.brandKo)}
+        onChange={(arr) => onFilterChange({ brandKo: arr.join(",") })}
       />
 
-      {/* 2. 반려동물 다중 필터 (영문 Enum <-> 한글 라벨 하이브리드 변환) */}
+      {/* 2. 반려동물 다중 필터 (강아지/고양이) */}
       <FilterRow
         label="반려동물"
         options={meta.animals.map((a) => a.label)}
@@ -120,7 +132,7 @@ export default function SearchFilterCard({ filters, onFilterChange }: SearchFilt
         }}
       />
 
-      {/* 3. 사료종류 동적 다중 필터 */}
+      {/* 3. 사료종류 다중 필터 (일반식/처방식) */}
       <FilterRow
         label="사료종류"
         options={meta.types.map((t) => t.label)}
@@ -131,15 +143,15 @@ export default function SearchFilterCard({ filters, onFilterChange }: SearchFilt
         }}
       />
 
-      {/* 4. 크기 동적 다중 필터 */}
+      {/* 4. 주단백질원 다중 필터 (기존 뼈대 연동 보존) */}
       <FilterRow
-        label="크기"
-        options={meta.sizes}
-        selectedValues={toArray(filters.sizeCategory)}
-        onChange={(arr) => onFilterChange({ sizeCategory: arr.join(",") })}
+        label="주단백질"
+        options={["닭고기", "오리고기", "연어", "소고기", "양고기", "칠면조", "생선/어류"]}
+        selectedValues={toArray(filters.proteins)}
+        onChange={(arr) => onFilterChange({ proteins: arr.join(",") })}
       />
 
-      {/* 5. 생애주기 동적 다중 필터 */}
+      {/* 5. 생애주기 다중 필터 (퍼피/어덜트/시니어/전연령 통합) */}
       <FilterRow
         label="생애주기"
         options={meta.stages.map((s) => s.label)}
@@ -147,6 +159,36 @@ export default function SearchFilterCard({ filters, onFilterChange }: SearchFilt
         onChange={(labels) => {
           const vals = labels.map((l) => meta.stages.find((s) => s.label === l)?.value || "").filter(Boolean);
           onFilterChange({ lifeStage: vals.join(",") });
+        }}
+      />
+
+      {/* 6. 🆕 키블 크기 다중 필터 */}
+      <FilterRow
+        label="키블크기"
+        options={kibbleSizeOptions}
+        selectedValues={toArray(filters.kibbleSize)}
+        onChange={(arr) => onFilterChange({ kibbleSize: arr.join(",") })}
+      />
+
+      {/* 7. 🆕 알레르기 제어 다중 필터 (가수분해, 글루텐프리, 그레인프리, LID 대응) */}
+      <FilterRow
+        label="알레르기"
+        options={meta.allergies.map((a) => a.label)}
+        selectedValues={toArray(filters.allergies).map((val) => meta.allergies.find((a) => a.value === val)?.label || "")}
+        onChange={(labels) => {
+          const vals = labels.map((l) => meta.allergies.find((a) => a.label === l)?.value || "").filter(Boolean);
+          onFilterChange({ allergies: vals.join(",") });
+        }}
+      />
+
+      {/* 8. 🆕 인증여부 다중 필터 (AAFCO, HACCP, 유기농 등 전격 배치) */}
+      <FilterRow
+        label="인증여부"
+        options={meta.certifications.map((c) => c.label)}
+        selectedValues={toArray(filters.certifications).map((val) => meta.certifications.find((c) => c.value === val)?.label || "")}
+        onChange={(labels) => {
+          const vals = labels.map((l) => meta.certifications.find((c) => c.label === l)?.value || "").filter(Boolean);
+          onFilterChange({ certifications: vals.join(",") });
         }}
       />
 

@@ -1,78 +1,120 @@
+import {
+  AnimalType,
+  LifeStage,
+  Allergy,
+  Certification,
+} from "@prisma/client";
 export const food9 = {
-  name: "치와와 어덜트",
-  brand: "royal canin",
-  animalType: "dog",
-  lifeStage: "adult",
-  sizeCategory: "s",
+  nameKo: "네츄럴랩 6-ZERO PLUS 2",
+  nameEn: "Natural Lab 6-zero plus 02 beef",
+
+  brandKo: "네츄럴랩",
+  brandEn: "Natural Lab",
+
+  animalType: AnimalType.dog,
+  lifeStage: LifeStage.all,
+  sizeCategory: "all",
+
   isPrescription: false,
-  country: "대한민국 김제",
-  sourceUrl: "https://www.royalcanin.com/kr",
+
+  price: 18000,
+  kibbleSize: 10,
+
+  allergies: [Allergy.HYDROLYZED],
+
+  certifications: [Certification.FSSC22000, 
+    Certification.HACCP, 
+    Certification.ORGANIC,
+    Certification.AAFCO],
+
+  country: "대한민국",
+  sourceUrl: "https://naturallab.net/",
 
   analysis: {
     create: {
-      protein: 26,
-      fat: 14,
-      fiber: 3,
-      ash: 5.7,
-      moisture: 10.5,
-      calcium: 0.6,
-      phosphorus: 0.48,
-    }
+      protein: 24,
+      fat: 12,
+      fiber: 6,
+      ash: 9,
+      moisture: 12,
+
+      calcium: 0.9,
+      phosphorus: 0.7,
+    },
   },
 
   ingredients: {
     create: [
-      { ingredientRaw: "쌀가루" },
-      { ingredientRaw: "옥수수가루" },
-      { ingredientRaw: "육분(닭)" },
-      { ingredientRaw: "밀 글루텐" },
-      { ingredientRaw: "동물성 지방(닭, 오리, 돼지)" },
-      { ingredientRaw: "동물성 유도단백질(닭, 칠면조)" },
-      { ingredientRaw: "사탕무박" },
-      { ingredientRaw: "혼합광물질류 합제" },
-      { ingredientRaw: "분말 셀룰로스" },
-      { ingredientRaw: "어유" },
-      { ingredientRaw: "대두유" },
+      { ingredientRaw: "가수분해 소고기" },
+      { ingredientRaw: "유기현미" },
+      { ingredientRaw: "유기보리" },
+      { ingredientRaw: "유기고구마" },
+      { ingredientRaw: "유기녹두" },
+      { ingredientRaw: "유기해바라기씨" },
+      { ingredientRaw: "유기완두" },
+      { ingredientRaw: "베타글루칸" },
+      { ingredientRaw: "DL-메치오닌" },
+      { ingredientRaw: "비타민제합제" },
+      { ingredientRaw: "미네랄제합제" },
+      { ingredientRaw: "어골칼슘" },
+      { ingredientRaw: "어분" },
+      { ingredientRaw: "유카추출물" },
       { ingredientRaw: "프락토올리고당" },
-      { ingredientRaw: "보리지유" },
-      { ingredientRaw: "금잔화분말" },
-      { ingredientRaw: "글루코사민" },
-      { ingredientRaw: "뮤코다당단백" },
-      { ingredientRaw: "아미노산제 합제" },
-      { ingredientRaw: "비타민A" },
-      { ingredientRaw: "비타민D3" },
-      { ingredientRaw: "철" },
-      { ingredientRaw: "요오드" },
-      { ingredientRaw: "구리" },
-      { ingredientRaw: "망간" },
-      { ingredientRaw: "아연" },
-      { ingredientRaw: "셀레늄" },
-      { ingredientRaw: "제올라이트" },
-      { ingredientRaw: "소르빈산칼륨" },
-      { ingredientRaw: "항산화제" }
-    ]
+      { ingredientRaw: "건조크릴" },
+      { ingredientRaw: "어유" },
+      { ingredientRaw: "사탕무박(무 섬유소)" },
+      { ingredientRaw: "타우린" },
+      { ingredientRaw: "아마씨" },
+      { ingredientRaw: "염화칼륨" },
+      { ingredientRaw: "천일염" },
+      { ingredientRaw: "씨벅턴열매" },
+      { ingredientRaw: "달맞이꽃종자" },
+      { ingredientRaw: "고수" },
+      { ingredientRaw: "당근" },
+      { ingredientRaw: "시금치" },
+      { ingredientRaw: "아스코르빈산" },
+      { ingredientRaw: "후코이단" },
+      { ingredientRaw: "유익균합제" },
+    ],
   },
 
   proteins: {
     create: [
-      { proteinType: "chicken", sourceRaw: "육분(닭)", isPrimary: true },
-      { proteinType: "unknown", sourceRaw: "밀 글루텐", isPrimary: false },
-      { proteinType: "chicken", sourceRaw: "동물성 유도단백질(닭, 칠면조)", isPrimary: false },
-      { proteinType: "turkey", sourceRaw: "동물성 유도단백질(닭, 칠면조)", isPrimary: false },
-    ]
+      {
+        proteinType: "beef",
+        sourceRaw: "가수분해 소고기",
+        isPrimary: true,
+      },
+      {
+        proteinType: "fish",
+        sourceRaw: "어분",
+        isPrimary: false,
+      },
+      {
+        proteinType: "krill",
+        sourceRaw: "건조크릴",
+        isPrimary: false,
+      },
+    ],
   },
 
   carbohydrates: {
     create: [
-      { carbType: "rice", sourceRaw: "쌀가루" },
-      { carbType: "corn", sourceRaw: "옥수수가루" },
-    ]
+      { carbType: "brown_rice", sourceRaw: "유기현미" },
+      { carbType: "barley", sourceRaw: "유기보리" },
+      { carbType: "sweet_potato", sourceRaw: "유기고구마" },
+      { carbType: "mung_bean", sourceRaw: "유기녹두" },
+      { carbType: "pea", sourceRaw: "유기완두" },
+      { carbType: "beet_pulp", sourceRaw: "사탕무박(무 섬유소)" },
+    ],
   },
 
   vegetables: {
     create: [
-      { vegetableType: "unknown", sourceRaw: "사탕무박" },
-      { vegetableType: "unknown", sourceRaw: "금잔화분말" },
-    ]
-  }
-}
+      { vegetableType: "sea_buckthorn", sourceRaw: "씨벅턴열매" },
+      { vegetableType: "coriander", sourceRaw: "고수" },
+      { vegetableType: "carrot", sourceRaw: "당근" },
+      { vegetableType: "spinach", sourceRaw: "시금치" },
+    ],
+  },
+};

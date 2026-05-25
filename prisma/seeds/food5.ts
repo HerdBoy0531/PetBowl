@@ -1,84 +1,126 @@
+import {
+  AnimalType,
+  LifeStage,
+  Allergy,
+  Certification,
+} from "@prisma/client";
+
 export const food5 = {
-  name: "미디움어덜트",
-  brand: "royal canin",
-  animalType: "dog",
-  lifeStage: "adult",
-  sizeCategory: "m",
+  nameKo: "네츄럴랩 케어3 강아지사료 피부&알러지",
+  nameEn: "Natural Lab care3 skin&allergy",
+
+  brandKo: "네츄럴랩",
+  brandEn: "Natural Lab",
+
+  animalType: AnimalType.dog,
+  lifeStage: LifeStage.all,
+
+  sizeCategory: "all",
+
   isPrescription: false,
-  country: "대한민국 김제",
-  sourceUrl: "https://www.royalcanin.com/kr",
+
+  price: 27000,
+  kibbleSize: 11,
+
+  allergies: [Allergy.HYDROLYZED],
+
+  certifications: [Certification.FSSC22000, 
+    Certification.HACCP, 
+    Certification.ORGANIC,
+    Certification.ECOCERT],
+
+  country: "대한민국",
+  sourceUrl: "https://naturallab.net/",
 
   analysis: {
     create: {
-      protein: 23,
-      fat: 12,
-      fiber: 2.4,
-      ash: 6.5,
-      moisture: 10.5,
-      calcium: 0.96,
-      phosphorus: 0.63,
-    }
+      protein: 24,
+      fat: 14,
+      fiber: 6,
+      ash: 9,
+      moisture: 12,
+
+      calcium: 0.9,
+      phosphorus: 0.7,
+    },
   },
 
   ingredients: {
     create: [
-      { ingredientRaw: "육분(닭, 오리)" },
-      { ingredientRaw: "밀가루" },
-      { ingredientRaw: "옥수수" },
-      { ingredientRaw: "밀" },
-      { ingredientRaw: "옥수수 가루" },
-      { ingredientRaw: "동물성 유지(닭, 오리)" },
-      { ingredientRaw: "유도 단백질(닭, 칠면조, 어류)" },
-      { ingredientRaw: "보리" },
-      { ingredientRaw: "밀 글루텐" },
-      { ingredientRaw: "사탕무박" },
-      { ingredientRaw: "양조효모" },
-      { ingredientRaw: "대두유" },
-      { ingredientRaw: "탄산칼슘" },
-      { ingredientRaw: "비타민제합제" },
-      { ingredientRaw: "정제소금" },
-      { ingredientRaw: "제일인산칼슘" },
-      { ingredientRaw: "혼합광물질류 합제" },
-      { ingredientRaw: "소르빈산칼륨" },
-      { ingredientRaw: "염화칼륨" },
-      { ingredientRaw: "해조분말" },
-      { ingredientRaw: "비타민 E(합성착색제)" },
-      { ingredientRaw: "어유" },
-      { ingredientRaw: "효모(만난올리고당의 원료)" },
-      { ingredientRaw: "해조유(EPA+DHA의 원료)" },
-      { ingredientRaw: "DL-메티오닌" },
-      { ingredientRaw: "비타민 C" },
-      { ingredientRaw: "식물성 유지" },
-      { ingredientRaw: "로즈마리 추출물" }
-    ]
+      { ingredientRaw: "가수분해 연어" },
+      { ingredientRaw: "유기 현미" },
+      { ingredientRaw: "유기 기장" },
+      { ingredientRaw: "유기 녹두" },
+      { ingredientRaw: "유기 해바라기씨" },
+      { ingredientRaw: "유기 보리" },
+      { ingredientRaw: "유기 완두" },
+      { ingredientRaw: "유기 고구마" },
+      { ingredientRaw: "유기 아마씨" },
+      { ingredientRaw: "비트펄프" },
+      { ingredientRaw: "인산칼슘" },
+      { ingredientRaw: "프락토올리고당" },
+      { ingredientRaw: "크릴오일(SPM OMEGA-3)" },
+      { ingredientRaw: "유기 귀리" },
+      { ingredientRaw: "비타민제 합제" },
+      { ingredientRaw: "미네랄제 합제" },
+      { ingredientRaw: "유카추출물" },
+      { ingredientRaw: "건조크릴" },
+      { ingredientRaw: "메티오닌" },
+      { ingredientRaw: "타우린" },
+      { ingredientRaw: "천일염" },
+      { ingredientRaw: "가수분해 초록입홍합 복합물" },
+      { ingredientRaw: "글루코사민" },
+      { ingredientRaw: "EPA-DHA" },
+      { ingredientRaw: "씨벅턴열매" },
+      { ingredientRaw: "달맞이꽃종자" },
+      { ingredientRaw: "고수" },
+      { ingredientRaw: "당근" },
+      { ingredientRaw: "시금치" },
+      { ingredientRaw: "아스코르빈산" },
+      { ingredientRaw: "유익균 합제" },
+      { ingredientRaw: "유산균건조분말" },
+    ],
   },
 
   proteins: {
     create: [
-      { proteinType: "chicken", sourceRaw: "육분(닭, 오리)", isPrimary: true },
-      { proteinType: "duck", sourceRaw: "육분(닭, 오리)", isPrimary: true },
-      { proteinType: "chicken", sourceRaw: "유도 단백질(닭, 칠면조, 어류)", isPrimary: false },
-      { proteinType: "turkey", sourceRaw: "유도 단백질(닭, 칠면조, 어류)", isPrimary: false },
-      { proteinType: "fish", sourceRaw: "유도 단백질(닭, 칠면조, 어류)", isPrimary: false },
-      { proteinType: "unknown", sourceRaw: "밀 글루텐", isPrimary: false },
-    ]
+      {
+        proteinType: "salmon",
+        sourceRaw: "가수분해 연어",
+        isPrimary: true,
+      },
+      {
+        proteinType: "green_lipped_mussel",
+        sourceRaw: "가수분해 초록입홍합 복합물",
+        isPrimary: false,
+      },
+      {
+        proteinType: "krill",
+        sourceRaw: "건조크릴",
+        isPrimary: false,
+      },
+    ],
   },
 
   carbohydrates: {
     create: [
-      { carbType: "unknown", sourceRaw: "밀가루" },
-      { carbType: "corn", sourceRaw: "옥수수" },
-      { carbType: "unknown", sourceRaw: "밀" },
-      { carbType: "corn", sourceRaw: "옥수수 가루" },
-      { carbType: "unknown", sourceRaw: "보리" },
-    ]
+      { carbType: "brown_rice", sourceRaw: "유기 현미" },
+      { carbType: "millet", sourceRaw: "유기 기장" },
+      { carbType: "mung_bean", sourceRaw: "유기 녹두" },
+      { carbType: "barley", sourceRaw: "유기 보리" },
+      { carbType: "pea", sourceRaw: "유기 완두" },
+      { carbType: "sweet_potato", sourceRaw: "유기 고구마" },
+      { carbType: "oat", sourceRaw: "유기 귀리" },
+      { carbType: "beet_pulp", sourceRaw: "비트펄프" },
+    ],
   },
 
   vegetables: {
     create: [
-      { vegetableType: "unknown", sourceRaw: "사탕무박" },
-      { vegetableType: "unknown", sourceRaw: "해조분말" },
-      { vegetableType: "unknown", sourceRaw: "로즈마리 추출물" },
-    ]
-  }
-}
+      { vegetableType: "sea_buckthorn", sourceRaw: "씨벅턴열매" },
+      { vegetableType: "coriander", sourceRaw: "고수" },
+      { vegetableType: "carrot", sourceRaw: "당근" },
+      { vegetableType: "spinach", sourceRaw: "시금치" },
+    ],
+  },
+};
