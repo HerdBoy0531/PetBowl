@@ -13,7 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 // --- Enum 정의 ---
 
 // 반려동물 종류
@@ -22,11 +21,34 @@ enum AnimalType {
   cat
 }
 
-// 반려동물 생애주기
+// 반려동물 생애주기 (전연령용 all 추가)
 enum LifeStage {
   puppy
   adult
   senior
+  all
+}
+
+// 알레르기 제어 속성
+enum Allergy {
+  HYDROLYZED     // 가수분해
+  GLUTEN_FREE    // 글루텐프리
+  GRAIN_FREE     // 그레인프리
+  LID            // 제한된 원료 (Limited Ingredient Diet)
+}
+
+// 인증여부 속성
+enum Certification {
+  AAFCO
+  FEDIAF
+  FDA
+  HACCP
+  ISO22000
+  GMP
+  FSSC22000
+  ECOCERT
+  ORGANIC
+
 }
 
 enum UserRole {
@@ -42,27 +64,36 @@ enum RequestStatus {
 
 // 사료 정보
 model Food {
-  id              Int      @id @default(autoincrement())
-  name            String
-  brand           String
+  id              Int             @id @default(autoincrement())
+  nameKo          String          // 한글 사료 이름
+  nameEn          String          // 영어 사료 이름
+  brandKo           String
+  brandEn           String
   animalType      AnimalType
   lifeStage       LifeStage
   sizeCategory    String
   isPrescription  Boolean
+  price           Int             @default(0) // 가격순 정렬을 위한 필수 가격 필드 추가
+  kibbleSize      Float?          // 키블크기 (숫자형으로 입력 예정)
+  allergies       Allergy[]       // 알레르기 다중 선택 반영 (Enum 배열)
+  certifications  Certification[] // 인증여부 다중 선택 반영 (Enum 배열)
   country         String?
   sourceUrl       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
-  //relations
+  // relations
   analysis        GuaranteedAnalysis?
   ingredients     Ingredient[]
   proteins        ProteinSource[]
   carbohydrates   CarbohydrateSource[]
   vegetables      VegetableSource[]
-  logs FoodViewLog[]
+  logs            FoodViewLog[]
 
-  @@index([brand])
+  @@index([brandKo])
+  @@index([brandEn])
+  @@index([price]) // 가격순 정렬 성능 최적화
+  @@index([nameKo]) // 이름순 정렬 성능 최적화
   @@index([animalType, lifeStage, sizeCategory])
 }
 
@@ -88,24 +119,24 @@ model GuaranteedAnalysis {
 
 // 사료 원재료 정보
 model Ingredient {
-  id             Int    @id @default(autoincrement())
-  foodId         Int
-  food           Food   @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  id            Int    @id @default(autoincrement())
+  foodId        Int
+  food          Food   @relation(fields: [foodId], references: [id], onDelete: Cascade)
 
-  ingredientRaw  String
+  ingredientRaw String
 
   @@index([foodId])
 }
 
 // 사료 단백질 원료 정보
 model ProteinSource {
-  id           Int     @id @default(autoincrement())
-  foodId       Int
-  food         Food    @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  id          Int     @id @default(autoincrement())
+  foodId      Int
+  food        Food    @relation(fields: [foodId], references: [id], onDelete: Cascade)
 
-  proteinType  String
-  sourceRaw    String?
-  isPrimary    Boolean
+  proteinType String
+  sourceRaw   String?
+  isPrimary   Boolean
 
   @@index([foodId])
   @@index([proteinType])
@@ -131,7 +162,7 @@ model FoodViewLog {
   createdAt DateTime @default(now()) // 조회된 시간
 
   @@index([foodId])
-  @@index([createdAt]) // 기간 검색 성능 최적화를 위한 인덱스
+  @@index([createdAt]) // 기간 검색(주간, 월간) 성능 최적화를 위한 인덱스
 }
 
 // 사료 야채 원료 정보
@@ -147,7 +178,6 @@ model VegetableSource {
 }
 
 // 유저 및 인증 관련 모델
-
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -167,18 +197,18 @@ model User {
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -194,7 +224,6 @@ model Session {
 }
 
 // --- 요청 사항 게시판 모델 ---
-
 model Request {
   id        Int           @id @default(autoincrement())
   title     String

@@ -55,18 +55,31 @@ export async function GET(req: Request) {
     });
 
     // 3. groupBy의 순서(순위)가 findMany 조회 시 섞이므로 원래 순위 배열대로 정렬 재조립
-    const rankedResult = groupRows.map((row) => {
-      const foodInfo = foods.find((f) => f.id === row.foodId);
-      return {
-        id: row.foodId,
-        name: foodInfo?.name || "알 수 없는 사료",
-        brand: foodInfo?.brand || "미지정 브랜드",
-        animalType: foodInfo?.animalType,
-        lifeStage: foodInfo?.lifeStage,
-        viewCount: row._count.foodId,
-        mainProtein: foodInfo?.proteins.map((p) => p.proteinType) || [],
-      };
-    }).filter(item => item.name !== "알 수 없는 사료");
+    const rankedResult = groupRows
+      .map((row) => {
+        const foodInfo = foods.find((f) => f.id === row.foodId);
+        
+        return {
+          id: row.foodId,
+          // ⭐️ 변경: 단일 name/brand 대신 Ko, En을 명확히 구분하여 전달 (메인 카드 정보 정립)
+          nameKo: foodInfo?.nameKo || "알 수 없는 사료",
+          nameEn: foodInfo?.nameEn || "Unknown Food",
+          brandKo: foodInfo?.brandKo || "미지정 브랜드",
+          brandEn: foodInfo?.brandEn || "Unknown Brand",
+          animalType: foodInfo?.animalType,
+          lifeStage: foodInfo?.lifeStage,
+          
+          // ⭐️ 추가: 메인 페이지 카드 컴포넌트 정보 정립을 위한 필수 메타데이터 수수료 추가
+          price: foodInfo?.price || 0,
+          kibbleSize: foodInfo?.kibbleSize || null,
+          allergies: foodInfo?.allergies || [],
+          certifications: foodInfo?.certifications || [],
+          
+          viewCount: row._count.foodId,
+          mainProtein: foodInfo?.proteins.map((p) => p.proteinType) || [],
+        };
+      })
+      .filter((item) => item.nameKo !== "알 수 없는 사료");
 
     return NextResponse.json({
       period,

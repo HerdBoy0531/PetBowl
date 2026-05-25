@@ -1,279 +1,182 @@
+// app/api/foods/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { AnimalType, LifeStage, Prisma } from "@prisma/client";
+import { AnimalType, LifeStage, Allergy, Certification, Prisma } from "@prisma/client";
 
-
+/**
+ * 🆕 사료 데이터 추가 (POST)
+ */
 export async function POST(req: Request) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  const food = await prisma.food.create({
-    data: {
-      name: body.name,
-      brand: body.brand,
-      animalType: body.animalType as AnimalType,
-      lifeStage: body.lifeStage as LifeStage,
-      sizeCategory: body.sizeCategory,
-      isPrescription: body.isPrescription ?? false,
-      country: body.country,
-      sourceUrl: body.sourceUrl,
-    },
-  });
+    const food = await prisma.food.create({
+      data: {
+        nameKo: body.nameKo,
+        nameEn: body.nameEn,
+        brandKo: body.brandKo,
+        brandEn: body.brandEn,
+        animalType: body.animalType as AnimalType,
+        lifeStage: body.lifeStage as LifeStage,
+        sizeCategory: body.sizeCategory,
+        isPrescription: body.isPrescription ?? false,
+        price: Number(body.price) || 0,
+        kibbleSize: body.kibbleSize ? Number(body.kibbleSize) : null,
+        allergies: (body.allergies || []) as Allergy[],
+        certifications: (body.certifications || []) as Certification[],
+        country: body.country,
+        sourceUrl: body.sourceUrl,
+      },
+    });
 
-  return NextResponse.json(food);
+    return NextResponse.json(food);
+  } catch (error) {
+    console.error("Food Create Error:", error);
+    return NextResponse.json({ message: "사료 데이터 생성 실패" }, { status: 500 });
+  }
 }
 
-// export async function GET(req: Request) {
-//   const { searchParams } = new URL(req.url);
-
-//   // 페이지 분할
-//   const page = Math.max(1, Number(searchParams.get("page")) || 1);
-//   const limit = Math.max(1, Number(searchParams.get("limit")) || 10);
-//   const skip = (page - 1) * limit;
-//   const sort = searchParams.get("sort");
-
-//   let orderBy: Prisma.FoodOrderByWithRelationInput;;
-
-//   if (sort === "name") {
-//     orderBy = { name: "asc" };
-//   } else if (sort === "brand") {
-//     orderBy = { brand: "asc" };
-//   } else {
-//     orderBy = { id: "desc" }; // default 최신순
-//   }
-
-//   // 상세 정보 검색
-//   const animalTypeParam = searchParams.get("animalType");
-//   const animalType = Object.values(AnimalType).find(
-//     (v) => v.toLowerCase() === animalTypeParam?.toLowerCase()
-//   );
-
-//   const lifeStageParam = searchParams.get("lifeStage");
-//   const lifeStage = Object.values(LifeStage).find(
-//     (v) => v.toLowerCase() === lifeStageParam?.toLowerCase()
-//   );
-
-//   const sizeCategory = searchParams.get("sizeCategory");
-//   const proteinParams = searchParams.get("protein");
-//   const proteins = proteinParams?.split(",");
-//   const search = searchParams.get("search");
-  
-
-//   const where: Prisma.FoodWhereInput = {
-//       ...(animalType && { animalType }),
-//       ...(lifeStage && { lifeStage }),
-//       ...(sizeCategory && { sizeCategory }),
-//       ...(search && {
-//         OR: [
-//           { name: { contains: search, mode: "insensitive" as const } },
-//           { brand: { contains: search, mode: "insensitive" as const } },
-//         ],
-//       }),
-
-//       // ...(protein && {
-//       //   proteins: {
-//       //     some: {
-//       //       proteinType: protein,
-//       //       isPrimary: true,
-//       //     },
-//       //   },
-//       // }),
-//       ...(proteins && {
-//         proteins: {
-//           some: {
-//             proteinType: { in: proteins },
-//             isPrimary: true,
-//           },
-//         },
-//       }),
-//   }
-
-//   const total = await prisma.food.count({ where });
-
-//   // const foods = await prisma.food.findMany({
-//   //   where: {
-//   //     ...(animalType && { animalType }),
-//   //     ...(lifeStage && { lifeStage }),
-//   //     ...(sizeCategory && { sizeCategory }),
-//   //     ...(search && {
-//   //       OR: [
-//   //         { name: { contains: search, mode: "insensitive" } },
-//   //         { brand: { contains: search, mode: "insensitive" } },
-//   //       ],
-//   //     }),
-
-//   //     ...(protein && {
-//   //       proteins: {
-//   //         some: {
-//   //           proteinType: protein,
-//   //           isPrimary: true,
-//   //         },
-//   //       },
-//   //     }),
-//   //   },
-
-//   //   include: {
-//   //     proteins: {
-//   //       where: { isPrimary: true },
-//   //       select: { proteinType: true },
-//   //     },
-//   //   },
-//   // });
-
-//   const foods = await prisma.food.findMany({
-//     where,
-//     skip,
-//     take: limit,
-//     orderBy,
-//     include: {
-//       proteins: {
-//         where: { isPrimary: true },
-//         select: { proteinType: true },
-//       }
-//     }
-//   })
-
-//   // 유저가 검색어(search)를 넣었고, 검색된 사료가 존재한다면 로그를 쌓습니다.
-//   if (search && foods.length > 0) {
-//     await prisma.foodViewLog.createMany({
-//       data: foods.map((f) => ({
-//         foodId: f.id,
-//         type: "SEARCH", // 검색 결과 노출 로그
-//       })),
-//     });
-//   }
-
-//   console.log("LifeStage enum:", Object.values(LifeStage));
-//   console.log("param:", lifeStageParam);
-
-//   const result = foods.map((food) => ({
-//     id: food.id,
-//     name: food.name,
-//     brand: food.brand,
-//     animalType: food.animalType,
-//     lifeStage: food.lifeStage,
-//     sizeCategory: food.sizeCategory,
-//     mainProtein: food.proteins.map(
-//       (p: { proteinType: string }) => p.proteinType
-//     ),
-//   }));
-
-//   return NextResponse.json({
-//     data: result,
-//     total,
-//     page,
-//     limit,
-//   });
-// }
-
+/**
+ * 🔍 사료 다중 필터 및 통합 검색 (GET)
+ */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
-  // 페이지 분할 및 정렬
+  // 1. 페이지네이션 변수 파싱
   const page = Math.max(1, Number(searchParams.get("page")) || 1);
   const limit = Math.max(1, Number(searchParams.get("limit")) || 10);
   const skip = (page - 1) * limit;
   const sort = searchParams.get("sort");
 
+  // 2. 이름순, 가격순 정렬 조건 처리 (인기순은 프론트에서 랭킹 API 연동 또는 추후 로그 연동)
   let orderBy: Prisma.FoodOrderByWithRelationInput;
-  if (sort === "name") orderBy = { name: "asc" };
-  else if (sort === "brand") orderBy = { brand: "asc" };
-  else orderBy = { id: "desc" };
+  if (sort === "name") {
+    orderBy = { nameKo: "asc" }; // 가나다 이름순 정렬
+  } else if (sort === "price") {
+    orderBy = { price: "asc" };  // 최저가 가격순 정렬
+  } else {
+    orderBy = { id: "desc" };    // 기본 최신 등록순
+  }
 
-  // 💡 다중 검색 필터 조립 파이프라인 (Comma Separated Strings -> Arrays 대응)
+  // 3. 필터 파라미터 수집
   const search = searchParams.get("search");
   const brandParam = searchParams.get("brand");
   const animalTypeParam = searchParams.get("animalType");
   const lifeStageParam = searchParams.get("lifeStage");
   const sizeCategoryParam = searchParams.get("sizeCategory");
   const prescriptionParam = searchParams.get("isPrescription");
-  const proteinParams = searchParams.get("protein");
+  const kibbleSizeParam = searchParams.get("kibbleSize"); // 숫자 기반
+  const allergiesParam = searchParams.get("allergies");   // Enum 배열 대응
+  const certificationsParam = searchParams.get("certifications"); // Enum 배열 대응
 
-  const where: Prisma.FoodWhereInput = {
-    ...(search && {
-      OR: [
-        { name: { contains: search, mode: "insensitive" } },
-        { brand: { contains: search, mode: "insensitive" } },
-      ],
-    }),
-  };
+  // 4. Prisma Where 조건 뼈대 빌드업
+  const where: Prisma.FoodWhereInput = {};
 
-  // 1. 제조사 다중 필터 적용
-  if (brandParam) {
-    where.brand = { in: brandParam.split(",") };
+  // 💡 한글/영어 이름 및 브랜드 혼용 통합 검색 고도화
+  if (search) {
+    where.OR = [
+      { nameKo: { contains: search, mode: "insensitive" } },
+      { nameEn: { contains: search, mode: "insensitive" } },
+      { brandKo: { contains: search, mode: "insensitive" } },
+      { brandEn: { contains: search, mode: "insensitive" } },
+    ];
   }
 
-  // 2. 반려동물 축종 다중 필터 적용 (Enum 캐스팅)
+  // 제조사(브랜드 한글명 기준) 다중 필터
+  if (brandParam) {
+    where.brandKo = { in: brandParam.split(",") };
+  }
+
+  // 축종 다중 필터
   if (animalTypeParam) {
     where.animalType = { in: animalTypeParam.split(",") as AnimalType[] };
   }
 
-  // 3. 생애주기 다중 필터 적용 (Enum 캐스팅)
+  // 생애주기 다중 필터
   if (lifeStageParam) {
     where.lifeStage = { in: lifeStageParam.split(",") as LifeStage[] };
   }
 
-  // 4. 크기 카테고리 다중 필터 적용
+  // 크기 카테고리 다중 필터
   if (sizeCategoryParam) {
     where.sizeCategory = { in: sizeCategoryParam.split(",") };
   }
 
-  // 5. 사료종류(일반/처방) 다중 필터 적용 (String -> Boolean 변환)
-if (prescriptionParam) {
+  // 처방식 여부 필터
+  if (prescriptionParam) {
     const booleans = prescriptionParam.split(",").map((v) => v === "true");
-    
-    // 💡 해결 포인트: 둘 다 체크(true, false)했으면 전체 조회가 되므로 필터를 적용하지 않고,
-    // 오직 하나만 체크했을 때만 해당 Boolean 값을 직접 매칭(equals)해 줍니다.
     if (booleans.length === 1) {
-      where.isPrescription = booleans[0]; // 또는 { equals: booleans[0] }
+      where.isPrescription = booleans[0];
     }
   }
 
-  // 6. 단백질 원료 다중 필터 적용 (기존 구조 유지)
-  if (proteinParams) {
-    const proteins = proteinParams.split(",");
-    where.proteins = {
-      some: {
-        proteinType: { in: proteins },
-        isPrimary: true,
-      },
+  // ⭐️ 신규 추가: 키블 크기 다중 필터 (유저가 선택한 mm 크기 배열 일치 검색)
+  if (kibbleSizeParam) {
+    const sizes = kibbleSizeParam.split(",").map(Number);
+    where.kibbleSize = { in: sizes };
+  }
+
+  // ⭐️ 신규 추가: 알레르기 제어 Enum 다중 배열 검색 (AND 조건 처리: 선택한 알러지 케어를 전부 만족하는 제품)
+  if (allergiesParam) {
+    const allergyList = allergiesParam.split(",") as Allergy[];
+    where.allergies = {
+      hasEvery: allergyList, 
+    };
+  }
+
+  // ⭐️ 신규 추가: 인증마크 Enum 다중 배열 검색 (AND 조건 처리: 선택한 인증을 전부 획득한 제품)
+  if (certificationsParam) {
+    const certList = certificationsParam.split(",") as Certification[];
+    where.certifications = {
+      hasEvery: certList,
     };
   }
 
   try {
-    const total = await prisma.food.count({ where });
-    const foods = await prisma.food.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy,
-      include: {
-        proteins: {
-          where: { isPrimary: true },
-          select: { proteinType: true },
+    // 5. DB 동시 총 개수 집계 및 조회 데이터 Fetch
+    const [total, foods] = await prisma.$transaction([
+      prisma.food.count({ where }),
+      prisma.food.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: {
+          proteins: {
+            where: { isPrimary: true },
+            select: { proteinType: true },
+          },
         },
-      },
-    });
+      }),
+    ]);
 
-    // 💡 검색로그 쌓기 (상세페이지 랭킹 집계용 인프라 보존)
+    // 6. 상세페이지 랭킹 집계용 실시간 인프라 로그 축적
     if (search && foods.length > 0) {
       await prisma.foodViewLog.createMany({
         data: foods.map((f) => ({ foodId: f.id, type: "SEARCH" })),
       });
     }
 
+    // 7. 정립된 Search Page 결과 카드 규격에 맞춰 결과 가공 전송
     const result = foods.map((food) => ({
       id: food.id,
-      name: food.name,
-      brand: food.brand,
+      nameKo: food.nameKo,
+      nameEn: food.nameEn,
+      brandKo: food.brandKo,
+      brandEn: food.brandEn,
       animalType: food.animalType,
       lifeStage: food.lifeStage,
       sizeCategory: food.sizeCategory,
+      price: food.price,
+      kibbleSize: food.kibbleSize,
+      allergies: food.allergies,
+      certifications: food.certifications,
       mainProtein: food.proteins.map((p) => p.proteinType),
     }));
 
     return NextResponse.json({ data: result, total, page, limit });
   } catch (error) {
-    console.error(error);
+    console.error("Food Grid Query API Error:", error);
     return NextResponse.json({ message: "조회 중 서버 에러 발생" }, { status: 500 });
   }
 }
