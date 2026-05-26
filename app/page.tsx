@@ -52,7 +52,7 @@ export default function HomePage() {
           원하는 사료 검색
         </h2>
         <p className="text-sm text-zinc-500 font-light max-w-md">
-          궁금한 사료의 이름이나 브랜드를 입력하여 상세한 영양 성분 비율과 가성비를 바로 확인해보세요.
+          궁금한 사료의 이름이나 브랜드를 입력하여 상세한 영양 성분 비율을 바로 확인해보세요.
         </p>
         <div className="w-full">
           <SearchBar />

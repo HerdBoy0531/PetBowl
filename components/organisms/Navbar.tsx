@@ -50,10 +50,12 @@
 //   );
 // }
 
+
+
 "use client";
 
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Button from "@/components/atoms/Button";
 
 export default function Navbar() {
@@ -61,72 +63,46 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-100 shadow-sm transition-all">
-      <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 h-20 flex items-center">
         
-        {/* 1. 로고 영역 */}
-        <Link href="/" className="text-2xl font-black text-black tracking-tight select-none">
-          PetBowl
-        </Link>
-
-        {/* 2. 중앙 메뉴 영역 (미니멀 오가닉 수치 동기화) */}
-        <div className="hidden md:flex items-center gap-8 font-medium text-zinc-600">
-          <Link href="/search" className="hover:text-black transition-colors">
-            사료 검색
-          </Link>
-          <Link href="/compare" className="hover:text-black transition-colors">
-            사료 비교
-          </Link>
-          {/* 💡 [보너스 케어] 404 방지를 위해 기존 /nutrient 뒤에 's'를 붙여 연동을 마감합니다. */}
-          <Link href="/nutrients" className="hover:text-black transition-colors">
-            영양성분
-          </Link>
-          <Link href="/request" className="hover:text-black transition-colors">
-            요청사항
+        {/* 1. 좌측 로고 (flex-1으로 공간 차지) */}
+        <div className="flex-1 flex justify-start">
+          <Link href="/" className="text-2xl font-black text-black tracking-tight select-none">
+            PetBowl
           </Link>
         </div>
 
-        {/* 3. 우측 인증/유저 상태 영역 */}
-        <div className="flex items-center gap-4">
+        {/* 2. 중앙 메뉴 (정중앙 정렬) */}
+        <div className="hidden md:flex flex-1 justify-center items-center gap-8 font-medium text-zinc-600">
+          <Link href="/search" className="hover:text-black transition-colors">사료 검색</Link>
+          <Link href="/compare" className="hover:text-black transition-colors">사료 비교</Link>
+          <Link href="/nutrients" className="hover:text-black transition-colors">영양성분</Link>
+          <Link href="/request" className="hover:text-black transition-colors">요청사항</Link>
+        </div>
+
+        {/* 3. 우측 상태 영역 (flex-1으로 공간 차지) */}
+        <div className="flex-1 flex justify-end items-center gap-4">
           {status === "loading" ? (
             <div className="w-16 h-8 bg-zinc-100 animate-pulse rounded-xl" />
           ) : session ? (
-            // A. 로그인 완료 상태
-            <div className="flex items-center gap-3 md:gap-4">
-              
-              {/* 💡 [교정 1] 유저 이름을 클릭하면 마이페이지로 즉시 라우팅 (오가닉 호버 언더라인 이식) */}
+            <div className="flex items-center gap-4">
               <Link 
                 href="/mypage" 
-                className="text-sm text-zinc-600 font-medium group transition-colors shrink-0"
+                className="text-sm text-zinc-600 font-medium hover:text-black transition-colors"
               >
-                <strong className="text-black font-semibold group-hover:text-zinc-600 group-hover:underline underline-offset-4 transition-all">
-                  {session.user?.nickname || session.user?.name}
-                </strong> 집사님
+                <strong className="text-black">{session.user?.nickname || session.user?.name}</strong> 님
               </Link>
               
-              {/* 관리자(ADMIN) 배지 */}
               {session.user?.role === "ADMIN" && (
-                <span className="text-[10px] bg-zinc-900 text-white px-2 py-0.5 rounded-md font-bold tracking-wider select-none shrink-0">
+                <span className="text-[10px] bg-zinc-900 text-white px-2 py-0.5 rounded-md font-bold tracking-wider">
                   ADMIN
                 </span>
               )}
-              
-              {/* 💡 [교정 2] 로그아웃 버튼의 패딩과 폰트를 한 단계 낮춰 시각적 조화를 성취합니다. */}
-              <Button 
-                variant="outline" 
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="px-3 py-1.5 text-sm rounded-xl font-normal border-zinc-200 text-zinc-500 hover:text-black hover:border-zinc-400 shrink-0 shadow-none"
-              >
-                로그아웃
-              </Button>
             </div>
           ) : (
-            // B. 로그아웃 상태
             <div className="flex items-center gap-2">
               <Link href="/login">
-                <Button variant="outline">로그인</Button>
-              </Link>
-              <Link href="/register" className="hidden sm:inline-block">
-                <Button variant="primary">회원가입</Button>
+                <Button variant="outline" className="text-sm px-4 py-2">로그인</Button>
               </Link>
             </div>
           )}
