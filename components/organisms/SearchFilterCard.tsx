@@ -76,6 +76,7 @@ interface FilterMeta {
   stages: { value: string; label: string }[];
   allergies: { value: string; label: string }[];       // 🆕 추가: 메타 명세 대응
   certifications: { value: string; label: string }[];  // 🆕 추가: 메타 명세 대응
+  proteins: { value: string; label: string }[]; // 주단백질원
 }
 
 export default function SearchFilterCard({ filters, onFilterChange }: SearchFilterCardProps) {
@@ -108,7 +109,11 @@ export default function SearchFilterCard({ filters, onFilterChange }: SearchFilt
   const toArray = (str: string) => (str ? str.split(",") : []);
 
   // 🆕 사료 임시 키블 크기 고정 옵션 풀 (백엔드 파싱 데이터 규격 동기화용)
-  const kibbleSizeOptions = ["0.5mm 이하", "0.6mm~0.8mm", "0.9mm~1.1mm", "1.2mm 이상"];
+  const kibbleSizeOptions = [
+    "소형 (0~9mm)",
+    "중형 (10~14mm)",
+    "대형 (15mm 이상)",
+  ];
 
   return (
     <section className="bg-white text-black border border-zinc-100 rounded-2xl overflow-hidden mb-8 shadow-sm animate-fade-in">
@@ -146,9 +151,23 @@ export default function SearchFilterCard({ filters, onFilterChange }: SearchFilt
       {/* 4. 주단백질원 다중 필터 (기존 뼈대 연동 보존) */}
       <FilterRow
         label="주단백질"
-        options={["닭고기", "오리고기", "연어", "소고기", "양고기", "칠면조", "생선/어류"]}
-        selectedValues={toArray(filters.proteins)}
-        onChange={(arr) => onFilterChange({ proteins: arr.join(",") })}
+        options={meta.proteins.map((p) => p.label)}
+        selectedValues={toArray(filters.proteins).map(
+          (val) =>
+            meta.proteins.find((p) => p.value === val)?.label || ""
+        )}
+        onChange={(labels) => {
+          const vals = labels
+            .map(
+              (label) =>
+                meta.proteins.find((p) => p.label === label)?.value || ""
+            )
+            .filter(Boolean);
+
+          onFilterChange({
+            proteins: vals.join(","),
+          });
+        }}
       />
 
       {/* 5. 생애주기 다중 필터 (퍼피/어덜트/시니어/전연령 통합) */}

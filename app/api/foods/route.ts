@@ -50,12 +50,32 @@ export async function GET(req: Request) {
 
   // 2. 이름순, 가격순 정렬 조건 처리 (인기순은 프론트에서 랭킹 API 연동 또는 추후 로그 연동)
   let orderBy: Prisma.FoodOrderByWithRelationInput;
+  // if (sort === "name") {
+  //   orderBy = { nameKo: "asc" }; // 가나다 이름순 정렬
+  // } else if (sort === "price") {
+  //   orderBy = { price: "asc" };  // 최저가 가격순 정렬
+  // } else {
+  //   orderBy = { id: "desc" };    // 기본 최신 등록순
+  // }
   if (sort === "name") {
-    orderBy = { nameKo: "asc" }; // 가나다 이름순 정렬
+    // 가나다순
+    orderBy = {
+      nameKo: "asc",
+    };
+
   } else if (sort === "price") {
-    orderBy = { price: "asc" };  // 최저가 가격순 정렬
+    // 가격 낮은순
+    orderBy = {
+      price: "asc",
+    };
+
   } else {
-    orderBy = { id: "desc" };    // 기본 최신 등록순
+    // 조회수 높은순
+    orderBy = {
+      logs: {
+        _count: "desc",
+      },
+    };
   }
 
   // 3. 필터 파라미터 수집
@@ -68,6 +88,7 @@ export async function GET(req: Request) {
   const kibbleSizeParam = searchParams.get("kibbleSize"); // 숫자 기반
   const allergiesParam = searchParams.get("allergies");   // Enum 배열 대응
   const certificationsParam = searchParams.get("certifications"); // Enum 배열 대응
+  const proteinsParam = searchParams.get("proteins");
 
   // 4. Prisma Where 조건 뼈대 빌드업
   const where: Prisma.FoodWhereInput = {};
@@ -112,8 +133,56 @@ export async function GET(req: Request) {
 
   // ⭐️ 신규 추가: 키블 크기 다중 필터 (유저가 선택한 mm 크기 배열 일치 검색)
   if (kibbleSizeParam) {
-    const sizes = kibbleSizeParam.split(",").map(Number);
-    where.kibbleSize = { in: sizes };
+    const sizes = kibbleSizeParam.split(",");
+
+    const conditions = [];
+
+    if (sizes.includes("소형 (0~9mm)")) {
+      conditions.push({
+        kibbleSize: {
+          gte: 0,
+          lte: 9,
+        },
+      });
+    }
+
+    if (sizes.includes("중형 (10~14mm)")) {
+      conditions.push({
+        kibbleSize: {
+          gte: 10,
+          lte: 14,
+        },
+      });
+    }
+
+    if (sizes.includes("대형 (15mm 이상)")) {
+      conditions.push({
+        kibbleSize: {
+          gte: 15,
+        },
+      });
+    }
+
+    if (conditions.length > 0) {
+      if (Array.isArray(where.AND)) {
+        where.AND.push({
+          OR: conditions,
+        });
+      } else if (where.AND) {
+        where.AND = [
+          where.AND,
+          {
+            OR: conditions,
+          },
+        ];
+      } else {
+        where.AND = [
+          {
+            OR: conditions,
+          },
+        ];
+      }
+    }
   }
 
   // ⭐️ 신규 추가: 알레르기 제어 Enum 다중 배열 검색 (AND 조건 처리: 선택한 알러지 케어를 전부 만족하는 제품)
@@ -132,6 +201,42 @@ export async function GET(req: Request) {
     };
   }
 
+  // if (proteinsParam) {
+  //   const proteins = proteinsParam.split(",");
+
+  //   where.proteins = {
+  //     some: {
+  //       proteinType: {
+  //         in: proteins,
+  //       },
+  //       isPrimary: true,
+  //     },
+  //   };
+  // }
+
+  if (proteinsParam) {
+    const proteins = proteinsParam.split(",");
+
+    const proteinCondition = {
+      proteins: {
+        some: {
+          proteinType: {
+            in: proteins,
+          },
+          isPrimary: true,
+        },
+      },
+    };
+
+    if (Array.isArray(where.AND)) {
+      where.AND.push(proteinCondition);
+    } else if (where.AND) {
+      where.AND = [where.AND, proteinCondition];
+    } else {
+      where.AND = [proteinCondition];
+    }
+  }
+
   try {
     // 5. DB 동시 총 개수 집계 및 조회 데이터 Fetch
     const [total, foods] = await prisma.$transaction([
@@ -141,10 +246,27 @@ export async function GET(req: Request) {
         skip,
         take: limit,
         orderBy,
-        include: {
+        select: {
+          id: true,
+
+          nameKo: true,
+          brandEn: true,
+
+          animalType: true,
+
+          allergies: true,
+
+          kibbleSize: true,
+
+          price: true,
+
           proteins: {
-            where: { isPrimary: true },
-            select: { proteinType: true },
+            where: {
+              isPrimary: true,
+            },
+            select: {
+              proteinType: true,
+            },
           },
         },
       }),
@@ -159,19 +281,34 @@ export async function GET(req: Request) {
 
     // 7. 정립된 Search Page 결과 카드 규격에 맞춰 결과 가공 전송
     const result = foods.map((food) => ({
+      // id: food.id,
+      // nameKo: food.nameKo,
+      // nameEn: food.nameEn,
+      // brandKo: food.brandKo,
+      // brandEn: food.brandEn,
+      // animalType: food.animalType,
+      // lifeStage: food.lifeStage,
+      // sizeCategory: food.sizeCategory,
+      // price: food.price,
+      // kibbleSize: food.kibbleSize,
+      // allergies: food.allergies,
+      // certifications: food.certifications,
+      // mainProtein: food.proteins.map((p) => p.proteinType),
       id: food.id,
       nameKo: food.nameKo,
-      nameEn: food.nameEn,
-      brandKo: food.brandKo,
       brandEn: food.brandEn,
+
       animalType: food.animalType,
-      lifeStage: food.lifeStage,
-      sizeCategory: food.sizeCategory,
-      price: food.price,
-      kibbleSize: food.kibbleSize,
+
       allergies: food.allergies,
-      certifications: food.certifications,
-      mainProtein: food.proteins.map((p) => p.proteinType),
+
+      kibbleSize: food.kibbleSize,
+
+      price: food.price,
+
+      mainProtein: food.proteins.map(
+        (protein) => protein.proteinType
+      ),
     }));
 
     return NextResponse.json({ data: result, total, page, limit });

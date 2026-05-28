@@ -103,7 +103,7 @@ function SearchPageContent() {
         if (currentAnimalType) query.set("animalType", currentAnimalType);
         if (currentLifeStage) query.set("lifeStage", currentLifeStage);
         if (currentSizeCategory) query.set("sizeCategory", currentSizeCategory);
-        if (currentProteins) query.set("protein", currentProteins); 
+        if (currentProteins) query.set("proteins", currentProteins); 
         if (currentSort) query.set("sort", currentSort);
         if (currentBrandKo) query.set("brand", currentBrandKo); 
         if (currentPrescription) query.set("isPrescription", currentPrescription);
@@ -156,7 +156,9 @@ function SearchPageContent() {
       else params.delete(key); 
     });
 
-    router.push(`/foods/search?${params.toString()}`); // 👈 경로 싱크 일치
+    router.push(`/search?${params.toString()}`, {
+      scroll: false,
+    }); // 👈 경로 싱크 일치
   };
 
   return (
@@ -192,13 +194,17 @@ function SearchPageContent() {
           onPageChange={(newPage) => {
             const params = new URLSearchParams(searchParams.toString());
             params.set("page", String(newPage));
-            router.push(`/foods/search?${params.toString()}`);
+            router.push(`/search?${params.toString()}`, {
+              scroll: false,
+            });
           }}
           onSortChange={(newSort) => {
             const params = new URLSearchParams(searchParams.toString());
             params.set("sort", newSort);
             params.set("page", "1");
-            router.push(`/foods/search?${params.toString()}`);
+            router.push(`/search?${params.toString()}`, {
+              scroll: false,
+            });
           }}
         />
       </div>
