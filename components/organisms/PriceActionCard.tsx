@@ -43,10 +43,10 @@ export default function PriceActionCard({
         {/* 인터랙션 버튼 레이어 */}
         <div className="space-y-2 pt-4">
           <Button variant="primary" fullWidth onClick={onAddCompare} className="py-3 text-sm">
-            비교 슬롯에 추가하기
+            비교 바구니에 추가하기
           </Button>
           <Button variant="outline" fullWidth onClick={onGoBack} className="py-3 text-sm">
-            목록으로 돌아가기
+            사료 검색으로 돌아가기
           </Button>
         </div>
       </div>
