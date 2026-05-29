@@ -55,6 +55,7 @@ import "./globals.css";
 import AuthContext from "@/components/providers/SessionProvider";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
+import GlobalCompareDock from "@/components/organisms/GlobalCompareDock";
 
 export const metadata = {
   title: "PetBowl - 반려동물 건강 사료 가이드",
@@ -78,9 +79,14 @@ export default function RootLayout({
           <main className="flex-grow pt-24 max-w-6xl w-full mx-auto px-4 pb-20">
             {children}
           </main>
+
+
           
           {/* 전역 하단 바 */}
           <Footer />
+
+          {/* 비교 바구니 */}
+          <GlobalCompareDock />
         </AuthContext>
       </body>
     </html>

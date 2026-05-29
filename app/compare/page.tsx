@@ -161,7 +161,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import CompareAddButton from "@/components/atoms/CompareAddButton";
 import CompareCard from "@/components/molecules/CompareCard";
 import SearchModal from "@/components/molecules/SearchModal";
@@ -359,100 +359,68 @@ function parseAnalysisData(rawFood: any) {
 }
 
 function CompareContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  // const { selectedFoods, addFood, removeFood } = useCompareStore();
   const { selectedFoods, addFood, removeFood } = useCompareStore();
   const validFoods = selectedFoods.filter(
     
     (food):food is NonNullable<typeof food> => food !== null
   )
 
+  const [compareFoods, setCompareFoods] = useState<any[] | null>([]);
+
+  useEffect(() => {
+    async function fetchCompareFoods() {
+      const results = await Promise.all(
+        selectedFoods.map(async (food) => {
+          if(!food) return null;
+
+          const res = await fetch(`/api/foods/${food.id}`);
+
+          if (!res.ok) return null;
+
+          return await res.json();
+        })
+      );
+
+      setCompareFoods(results);
+    }
+
+    if (validFoods.length > 0) {
+      fetchCompareFoods();
+    } else {
+      setCompareFoods([]);
+    }
+  }, [selectedFoods]);
   
-  const leftFood = selectedFoods[0];
-  const rightFood = selectedFoods[1];
+  const leftFood = compareFoods ? compareFoods[0] : null;
+  const rightFood = compareFoods ? compareFoods[1] : null;
 
   console.log(leftFood);
+
+  const leftParsedNutrients =
+  parseAnalysisData(leftFood);
+
+  const rightParsedNutrients =
+    parseAnalysisData(rightFood);
 
   const leftNutrients =
     leftFood && rightFood
       ? compareNutrients(
-          leftFood.nutrients,
-          rightFood.nutrients
+          leftParsedNutrients,
+          rightParsedNutrients
         )
-      : leftFood?.nutrients || [];
+      : leftParsedNutrients;
 
   const rightNutrients =
     leftFood && rightFood
       ? compareNutrients(
-          rightFood.nutrients,
-          leftFood.nutrients
+          rightParsedNutrients,
+          leftParsedNutrients
         )
-      : rightFood?.nutrients || [];
+      : rightParsedNutrients;
+
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // 🔄 1. 새로고침 시 URL 파라미터 역추적 복구 파이프라인
-  useEffect(() => {
-    const id1 = searchParams.get("id1");
-    const id2 = searchParams.get("id2");
-    
-    // if ((id1 || id2) && selectedFoods.length === 0) {
-    if ((id1 || id2) && validFoods.length === 0) {
-      async function restoreCompareList() {
-        setIsLoading(true);
-        const ids = [id1, id2].filter(Boolean);
-        
-        try {
-          for (const id of ids) {
-            const res = await fetch(`/api/foods/${id}`, { cache: "no-store" });
-            if (res.ok) {
-              const rawFood = await res.json();
-              const formattedNutrients = parseAnalysisData(rawFood); // 통째로 넘겨 내부 탐색
-
-              console.log(rawFood);
-
-              addFood({
-                id: Number(rawFood.id),
-                name: rawFood.nameKo ?? rawFood.name,
-                brand: rawFood.brandKo ?? rawFood.brand,
-
-                proteins: rawFood.proteins,
-                animalType: rawFood.animalType,
-                allergies: rawFood.allergies,
-                certifications: rawFood.certifications,
-                lifeStage: rawFood.lifeStage,
-                kibbleSize: rawFood.kibbleSize,
-                sizeCategory: rawFood.sizeCategory,
-
-                nutrients: formattedNutrients,
-              });
-            }
-          }
-        } catch (error) {
-          console.error("비교 데이터 복구 실패:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-
-      restoreCompareList();
-    }
-  }, [searchParams]);
-
-  // 🔄 2. 바구니 변경 시 주소창 URL 자동 동기화
-  useEffect(() => {
-    const id1 = selectedFoods[0]?.id || "";
-    const id2 = selectedFoods[1]?.id || "";
-    
-    if (id1 || id2) {
-      router.replace(`/compare?id1=${id1}&id2=${id2}`, { scroll: false });
-    } else {
-      router.replace("/compare", { scroll: false });
-    }
-  }, [selectedFoods, router]);
 
   // 💡 3. 모달에서 추가 시 실시간 단독 상세 fetch 및 가공 바인딩
   const handleAddFood = async (lightFood: any) => {
@@ -475,16 +443,6 @@ function CompareContent() {
         id: Number(fullFood.id),
         name: fullFood.nameKo ?? fullFood.name,
         brand: fullFood.brandKo ?? fullFood.brand,
-
-        proteins: fullFood.mainProtein,
-        allergies: fullFood.allergies,
-        certifications: fullFood.certifications,
-        lifeStage: fullFood.lifeStage,
-        sizeCategory: fullFood.sizeCategory,
-        kibbleSize: fullFood.kibbleSize,
-        animalType: fullFood.animalType,
-
-        nutrients: formattedNutrients,
       });
 
       if (!success) {
@@ -511,7 +469,7 @@ function CompareContent() {
       <div className="relative">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[...Array(MAX_SLOTS)].map((_, index) => {
-            const foodItem = selectedFoods[index];
+            const foodItem = compareFoods ? compareFoods[index] : null;
 
             console.log(foodItem);
 
@@ -522,7 +480,7 @@ function CompareContent() {
               >
                 {foodItem ? (
                   <CompareCard
-                    name={foodItem.name}
+                    name={foodItem.nameKo}
                     basicTags={createBasicTags(foodItem)}
                     featureTags={createFeatureTags(foodItem)}
                     nutrients={index === 0 ? leftNutrients : rightNutrients}

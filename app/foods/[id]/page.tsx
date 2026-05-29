@@ -114,19 +114,30 @@ interface NutrientAnalysis {
 }
 
 interface FoodDetailData {
-  id: string;
-  name: string;
-  brand: string;
-  animalType: string;
-  lifeStage: string;
-  sizeCategory: string;
-  mainProtein: string;
+  id: number;
+
+  nameKo: string;
+  brandEn: string;
+
+  animalType?: string;
+  lifeStage?: string;
+  sizeCategory?: string;
+
+  kibbleSize?: number;
+
+  allergies?: string[];
+  certifications?: string[];
+
+  proteins?: any[];
+
+  analysis: {
+    label: string;
+    value: string;
+  }[];
+
   price: string;
   weight: string;
   calories: string;
-  description: string;
-  ingredients: string;
-  analysis: NutrientAnalysis[];
 }
 
 export default function FoodDetailPage() {
@@ -166,24 +177,21 @@ export default function FoodDetailPage() {
   // 💡 2. [비교 슬롯 추가] 핸들러 리터칭 (스토어 인터페이스 규격 변환 레이어 가동)
   const handleAddCompareSlot = () => {
     if (!food) return;
-
+    console.log("food",food);
     // 💡 핵심 교정: 스토어의 CompareFood 규격(nutrients, value: string)에 일치하도록 맵핑 조립
     const foodToStore = {
       id: Number(food.id),
-      name: food.name,
-      brand: food.brand,
-      nutrients: food.analysis.map((item) => ({
-        label: item.label,
-        // 숫자와 단위를 끈끈하게 결합하여 스토어가 원하는 'string' 타입으로 변환 (ex: "38% 이상")
-        value: `${item.value}${item.unit}`, 
-      })),
+      name: food.nameKo,
+      brand: food.brandEn,
     };
+
+     console.log("foodToStore",foodToStore)
 
     // Zustand 스토어의 캡슐화 로직으로 전송 및 성공 여부 확인
     const success = addFood(foodToStore);
 
     if (success) {
-      alert(`[${food.brand}] ${food.name}\n사료 비교 바구니에 정상 장착되었습니다!`);
+      alert(`[${food.brandEn}] ${food.nameKo}\n사료 비교 바구니에 정상 장착되었습니다!`);
     } else {
       // 스토어 내부 분기(중복이거나 2개 초과)일 때 예외 안내 처리
       alert("이미 담긴 사료이거나 비교 슬롯(최대 2개)이 꽉 찼습니다.\n비교 페이지나 우측 독 위젯에서 비워주세요.");
@@ -200,6 +208,7 @@ export default function FoodDetailPage() {
 
   if (!food) return null;
   console.log("food", food);
+ 
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-fade-in w-full">

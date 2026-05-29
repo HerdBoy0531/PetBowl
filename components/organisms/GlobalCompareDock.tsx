@@ -96,28 +96,26 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useCompareStore } from "@/store/useCompareStore";
 
-interface SelectedFood {
-  id: number;
-  nameKo: string;
-  brandEn: string;
-}
 
-interface CompareStickyDockProps {
-  selectedFoods: SelectedFood[];
-  onRemove: (id: number) => void;
-  onCompare: () => void;
-}
+export default function GlobalCompareDock() {
+  console.log("GlobalCompareDock Render");
 
-export default function CompareStickyDock({
-  selectedFoods,
-  onRemove,
-  onCompare,
-}: CompareStickyDockProps) {
   const [isOpen, setIsOpen] = useState(true); // 기본적으로 열린 상태
-  if (selectedFoods.length === 0) return null;
+  const router = useRouter();
 
-  const canCompare = selectedFoods.length === 2;
+  const { selectedFoods, removeFood } = useCompareStore();
+
+  const validFoods = selectedFoods.filter(Boolean);
+
+  if (validFoods.length === 0) return null;
+
+  console.log(selectedFoods);
+  console.log(validFoods);
+
+  const canCompare = validFoods.length === 2;
 
   return (
     <motion.div 
@@ -145,22 +143,22 @@ export default function CompareStickyDock({
             <div className="flex justify-between items-center border-b border-zinc-100 pb-2">
               <h5 className="text-xs font-bold text-zinc-700 tracking-tight">선택된 사료</h5>
               <span className="text-[10px] font-mono text-zinc-400 font-light">
-                {selectedFoods.length} / 2
+                {validFoods.length} / 2
               </span>
             </div>
 
             <div className="flex flex-col gap-2 w-full">
               {[0, 1].map((index) => {
-                const food = selectedFoods[index];
+                const food = validFoods[index];
                 return (
                   <div key={index} className={`flex items-center justify-between gap-2 px-3 py-2.5 text-xs rounded-xl border transition-all ${food ? "bg-zinc-50 border-zinc-200/60" : "bg-white border-dashed border-zinc-200 text-zinc-300 justify-center"}`}>
                     {food ? (
                       <>
                         <span className="truncate">
-                          <strong className="text-[9px] block text-zinc-400 uppercase">{food.brandEn}</strong>
-                          {food.nameKo}
+                          <strong className="text-[9px] block text-zinc-400 uppercase">{food.brand}</strong>
+                          {food.name}
                         </span>
-                        <button onClick={() => onRemove(food.id)} className="text-zinc-400 hover:text-red-500 p-1">✕</button>
+                        <button onClick={() => removeFood(index)} className="text-zinc-400 hover:text-red-500 p-1">✕</button>
                       </>
                     ) : (
                       <span className="text-[10px]">빈 슬롯</span>
@@ -172,7 +170,7 @@ export default function CompareStickyDock({
 
             <button
               disabled={!canCompare}
-              onClick={onCompare}
+              onClick={() => router.push("/compare")}
               className={`w-full py-2.5 text-xs font-bold rounded-xl tracking-tight transition-all ${canCompare ? "bg-black text-white hover:bg-zinc-800" : "bg-zinc-100 text-zinc-400 cursor-not-allowed"}`}
             >
               성분 비교하기

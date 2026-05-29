@@ -41,16 +41,6 @@ interface CompareFood {
   id: number;
   name: string;
   brand: string;
-
-  animalType?: string;
-  kibbleSize?: number;
-  proteins?: string[];
-  
-  allergies?: string[];
-  certifications?: string[];
-  lifeStage?: string;
-  sizeCategory?: string;
-  nutrients: { label: string; value: string }[];
 }
 
 interface CompareState {

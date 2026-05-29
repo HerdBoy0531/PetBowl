@@ -330,16 +330,22 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FoodResultItem from "@molecules/FoodResultItem";
 import Input from "@/components/atoms/Input";
-import CompareStickyDock from "./CompareStickyDock"; // 💡 분리된 플로팅 바 수입
+import { useCompareStore } from "@/store/useCompareStore";
+
+// import CompareStickyDock from "./CompareStickyDock"; // 💡 분리된 플로팅 바 수입
 
 interface Food {
   id: number;
   nameKo: string;
   brandEn: string;
   animalType: string;
+  lifeStage: string;
+  sizeCategory: string;
   allergies: string[];
+  certifications: string[];
+  proteins: any[];
   mainProtein: string[];
-  kibbleSize?: number | null;
+  kibbleSize?: number | undefined;
   price: number;
 }
 
@@ -365,36 +371,41 @@ export default function FoodTableList({
   onSortChange,
 }: FoodTableListProps) {
   const router = useRouter();
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  
+  // const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [localSearch, setLocalSearch] = useState("");
 
+
+  const {
+    selectedFoods,
+    addFood,
+    removeFood,
+  } = useCompareStore();
+
+
   // 토글 추가/삭제 로직
-  const handleToggleAdd = (id: number) => {
-    setSelectedIds((prev) => {
-      if (prev.includes(id)) return prev.filter((item) => item !== id);
-      if (prev.length >= 2) return prev;
-      return [...prev, id];
+  const handleToggleAdd = (food: Food) => {
+    const existingIndex = selectedFoods.findIndex(
+      (item) => item?.id === food.id
+    );
+
+    if (existingIndex !== -1) {
+      removeFood(existingIndex);
+      return;
+    }
+
+    const success = addFood({
+      id: food.id,
+      name: food.nameKo,
+      brand: food.brandEn,
     });
-  };
 
-  // 💡 스스티키 독 내부에서 호출할 삭제 전용 핸들러
-  const handleRemoveId = (id: number) => {
-    setSelectedIds((prev) => prev.filter((item) => item !== id));
-  };
-
-  const isMaxCapacity = selectedIds.length >= 2;
-
-  // 💡 선택된 고유 ID 배열을 기반으로 실제 매칭되는 사료 메타정보 조립 추출 (독 전달용)
-  const selectedFoodsData = selectedIds
-    .map((id) => foods.find((f) => f.id === id))
-    .filter(Boolean) as Food[];
-
-  // 비교 확정 라우팅 실행
-  const handleGoCompare = () => {
-    if (selectedIds.length === 2) {
-      router.push(`/compare?id1=${selectedIds[0]}&id2=${selectedIds[1]}`);
+    if (!success) {
+      alert("이미 추가된 사료이거나 비교 슬롯이 가득 찼습니다.");
     }
   };
+
+  const isMaxCapacity = selectedFoods.filter(Boolean).length >= 2;
 
   const filteredFoods = foods.filter((food) => {
     const name = (food.nameKo || "").toLowerCase();
@@ -473,8 +484,10 @@ export default function FoodTableList({
                 mainProtein={food.mainProtein ?? []}
                 kibbleSize={food.kibbleSize}
                 price={food.price ?? 0}
-                isAdded={selectedIds.includes(food.id)}
-                onToggleAdd={() => handleToggleAdd(food.id)}
+                isAdded={selectedFoods.some(
+                  (item) => item?.id === food.id
+                )}
+                onToggleAdd={() => handleToggleAdd(food)}
                 isMaxCapacity={isMaxCapacity}
               />
             ))}
@@ -506,14 +519,6 @@ export default function FoodTableList({
           </button>
         </div>
       )}
-
-      {/* 👑 독립 분리 완료: 화면에 상시 떠서 실시간 관제 및 개별 삭제가 가능한 플로팅 스스티키 독 */}
-      <CompareStickyDock
-            selectedFoods={selectedFoodsData}
-            onRemove={handleRemoveId}
-            onCompare={handleGoCompare}
-      />
-
     </div>
   );
 }

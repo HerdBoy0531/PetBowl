@@ -117,8 +117,11 @@ function SearchPageContent() {
         query.set("limit", String(currentLimit));
 
         const res = await fetch(`/api/foods?${query.toString()}`, { cache: "no-store" });
+        console.log("API RESULT", res);
         if (res.ok) {
           const result = await res.json();
+            console.log("여기보세요re");
+            console.log(result);
           setFoods(result.data);
           setTotal(result.total);
         }
@@ -128,7 +131,10 @@ function SearchPageContent() {
         setIsLoading(false);
       }
     }
-
+    
+    console.log("여기보세요");
+    console.log(foods);
+   
     fetchFilteredFoods();
   }, [
     currentSearch,
