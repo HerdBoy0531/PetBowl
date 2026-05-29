@@ -170,7 +170,7 @@ import { useCompareStore } from "@/store/useCompareStore";
 const MAX_SLOTS = 2;
 
 // 🎯 영양소 한글 번역 사전 (백엔드 명세가 매칭되면 한글로 치환)
-const NUTRIENT_DICTIONARY: Record<string, string> = {
+const nutrientsMap: Record<string, string> = {
   crudeProtein: "조단백질",
   crudeFat: "조지방",
   crudeFiber: "조섬유",
@@ -180,11 +180,144 @@ const NUTRIENT_DICTIONARY: Record<string, string> = {
   fat: "조지방",
   fiber: "조섬유",
   ash: "조회분",
+  calcium: "칼슘",
+  phosphorus: "인",
+  sodium: "나트륨",
+  omega3: "오메가3",
+  omega6: "오메가6",
   "조단백질": "조단백질",
   "조지방": "조지방",
   "조섬유": "조섬유",
   "조회분": "조회분",
   "수분": "수분",
+  "칼슘": "칼슘",
+  "인": "인",
+  "나트륨": "나트륨",
+  "오메가3": "오메가3",
+  "오메가6": "오메가6",
+};
+
+// 생애주기 한글화
+const lifeStageMap: Record<string, string> = {
+  puppy: "퍼피",
+  adult: "성견",
+  senior: "시니어",
+  all: "전연령",
+};
+
+// 반려동물 종류 한글화
+const animalTypeMap: Record<string, string> = {
+  dog: "강아지",
+  cat: "고양이",
+}
+
+// 주단백질원 종류 한글화
+const proteinTypeMap: Record<string, string> = {
+  chicken: "닭고기",
+  pork: "돼지고기",
+  beef: "소고기",
+  salmon: "연어",
+  lamb: "양고기",
+
+  duck: "오리고기",
+  turkey: "칠면조",
+  fish: "생선",
+  venison: "사슴고기",
+  rabbit: "토끼고기",
+  kangaroo: "캥거루고기",
+  goat: "염소고기",
+}
+
+// 알레르기 종류 한글화
+const allergyMap: Record<string, string> = {
+  HYDROLYZED: "가수분해",
+  GRAIN_FREE: "그레인프리",
+  GLUTEN_FREE: "글루텐프리",
+  LID: "LID",
+};
+
+// Tags 분리
+// 기본 정보 Tags
+const createBasicTags = (food: any) => {
+  const tags: string[] = [];
+
+  if (food.animalType) {
+    tags.push(
+      animalTypeMap[food.animalType] ?? food.animalType
+    );
+  }
+
+  if (food.lifeStage) {
+    tags.push(
+      lifeStageMap[food.lifeStage] ?? food.lifeStage
+    );
+  }
+
+  if (food.proteins?.length) {
+    tags.push(
+      proteinTypeMap[
+        food.proteins[0].proteinType
+      ] ?? food.proteins[0].proteinType
+    );
+  }
+
+  if (food.kibbleSize) {
+    tags.push(`${food.kibbleSize}mm`);
+  }
+
+  return tags;
+};
+
+// 알레르기, 인증 정보 Tags
+const createFeatureTags = (food: any) => {
+  const tags: string[] = [];
+
+  if (food.allergies?.length) {
+    tags.push(
+      ...food.allergies.map(
+        (a: string) => allergyMap[a] ?? a
+      )
+    );
+  }
+
+  if (food.certifications?.length) {
+    tags.push(...food.certifications);
+  }
+
+  return [...new Set(tags)].slice(0, 4);
+};
+
+
+
+// 영양성분 수치 비교
+const parseNumber = (value: string) => {
+  return Number(value.replace(/[^\d.]/g, ""));
+};
+
+const compareNutrients = (
+  left: { label: string; value: string }[],
+  right: { label: string; value: string }[]
+) => {
+  return left.map((leftItem) => {
+    const rightItem = right.find(
+      (r) => r.label === leftItem.label
+    );
+
+    if (!rightItem) {
+      return {
+        ...leftItem,
+        isHigher: false,
+      };
+    }
+
+    const leftValue = parseNumber(leftItem.value);
+    const rightValue = parseNumber(rightItem.value);
+
+    return {
+      ...leftItem,
+      isHigher: leftValue > rightValue,
+    };
+  });
 };
 
 // 🔬 [자율 키 스캔 엔진] 어떤 필드명으로 오든 성분 수치를 강제로 솎아내는 방어 함수
@@ -198,10 +331,14 @@ function parseAnalysisData(rawFood: any) {
   // Case A: 중괄호 일반 객체 구조일 때 {}
   if (typeof analysis === "object" && !Array.isArray(analysis)) {
     return Object.entries(analysis)
-      .filter(([key]) => !["id", "foodId", "createdAt", "updatedAt"].includes(key)) // 메타 ID들은 제외
+      .filter(([key, value]) =>
+        !["id", "foodId", "createdAt", "updatedAt"].includes(key) &&
+        value !== null &&
+        value !== undefined
+      ) // 메타 ID들은 제외
       .map(([key, value]) => {
         // 사전에 등록된 단어면 한글로 바꾸고, 처음 보는 영문 키면 그대로 노출시켜 확인 가능하게 처리
-        const label = NUTRIENT_DICTIONARY[key] || key; 
+        const label = nutrientsMap[key] || key; 
         const displayValue = String(value).includes("%") ? value : `${value}%`;
         return {
           label,
@@ -225,7 +362,35 @@ function CompareContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // const { selectedFoods, addFood, removeFood } = useCompareStore();
   const { selectedFoods, addFood, removeFood } = useCompareStore();
+  const validFoods = selectedFoods.filter(
+    
+    (food):food is NonNullable<typeof food> => food !== null
+  )
+
+  
+  const leftFood = selectedFoods[0];
+  const rightFood = selectedFoods[1];
+
+  console.log(leftFood);
+
+  const leftNutrients =
+    leftFood && rightFood
+      ? compareNutrients(
+          leftFood.nutrients,
+          rightFood.nutrients
+        )
+      : leftFood?.nutrients || [];
+
+  const rightNutrients =
+    leftFood && rightFood
+      ? compareNutrients(
+          rightFood.nutrients,
+          leftFood.nutrients
+        )
+      : rightFood?.nutrients || [];
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -234,7 +399,8 @@ function CompareContent() {
     const id1 = searchParams.get("id1");
     const id2 = searchParams.get("id2");
     
-    if ((id1 || id2) && selectedFoods.length === 0) {
+    // if ((id1 || id2) && selectedFoods.length === 0) {
+    if ((id1 || id2) && validFoods.length === 0) {
       async function restoreCompareList() {
         setIsLoading(true);
         const ids = [id1, id2].filter(Boolean);
@@ -246,10 +412,21 @@ function CompareContent() {
               const rawFood = await res.json();
               const formattedNutrients = parseAnalysisData(rawFood); // 통째로 넘겨 내부 탐색
 
+              console.log(rawFood);
+
               addFood({
                 id: Number(rawFood.id),
-                name: rawFood.name,
-                brand: rawFood.brand,
+                name: rawFood.nameKo ?? rawFood.name,
+                brand: rawFood.brandKo ?? rawFood.brand,
+
+                proteins: rawFood.proteins,
+                animalType: rawFood.animalType,
+                allergies: rawFood.allergies,
+                certifications: rawFood.certifications,
+                lifeStage: rawFood.lifeStage,
+                kibbleSize: rawFood.kibbleSize,
+                sizeCategory: rawFood.sizeCategory,
+
                 nutrients: formattedNutrients,
               });
             }
@@ -292,11 +469,22 @@ function CompareContent() {
       const formattedNutrients = parseAnalysisData(fullFood);
       console.log("✨ 정제가 완료된 영양성분 결과 배열:", formattedNutrients);
 
+      console.log(fullFood);
+      
       const success = addFood({
         id: Number(fullFood.id),
-        name: fullFood.name,
-        brand: fullFood.brand,
-        nutrients: formattedNutrients, 
+        name: fullFood.nameKo ?? fullFood.name,
+        brand: fullFood.brandKo ?? fullFood.brand,
+
+        proteins: fullFood.mainProtein,
+        allergies: fullFood.allergies,
+        certifications: fullFood.certifications,
+        lifeStage: fullFood.lifeStage,
+        sizeCategory: fullFood.sizeCategory,
+        kibbleSize: fullFood.kibbleSize,
+        animalType: fullFood.animalType,
+
+        nutrients: formattedNutrients,
       });
 
       if (!success) {
@@ -320,33 +508,46 @@ function CompareContent() {
           최대 2개의 사료를 선택하여 영양 성분 비율과 특징을 한눈에 대조해보세요.
         </p>
       </header>
+      <div className="relative">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[...Array(MAX_SLOTS)].map((_, index) => {
+            const foodItem = selectedFoods[index];
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[...Array(MAX_SLOTS)].map((_, index) => {
-          const foodItem = selectedFoods[index];
-          return (
-            <div 
-              key={index} 
-              className="min-h-[520px] flex flex-col items-center justify-center bg-white border border-zinc-100 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 p-6 overflow-hidden relative w-full"
-            >
-              {foodItem ? (
-                <CompareCard 
-                  name={`[${foodItem.brand}] ${foodItem.name}`} 
-                  nutrients={foodItem.nutrients} 
-                  onRemove={() => removeFood(foodItem.id)}
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center space-y-3 text-center">
-                  <span className="text-[56px] font-black text-zinc-500/5 select-none absolute top-4 left-6">
-                    0{index + 1}
-                  </span>
-                  <CompareAddButton onClick={() => setIsModalOpen(true)} />
-                  <p className="text-xs text-zinc-400 font-light">비교할 사료를 추가해 주세요</p>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            console.log(foodItem);
+
+            return (
+              <div 
+                key={index} 
+                className="min-h-[520px] flex flex-col items-center justify-center bg-white border border-zinc-100 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 p-6 overflow-hidden relative w-full"
+              >
+                {foodItem ? (
+                  <CompareCard
+                    name={foodItem.name}
+                    basicTags={createBasicTags(foodItem)}
+                    featureTags={createFeatureTags(foodItem)}
+                    nutrients={index === 0 ? leftNutrients : rightNutrients}
+                    onRemove={() => removeFood(index)}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center space-y-3 text-center">
+                    <span className="text-[56px] font-black text-zinc-500/5 select-none absolute top-4 left-6">
+                      0{index + 1}
+                    </span>
+                    <CompareAddButton onClick={() => setIsModalOpen(true)} />
+                    <p className="text-xs text-zinc-400 font-light">비교할 사료를 추가해 주세요</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-b from-white to-zinc-50 border border-zinc-200 shadow-xl flex items-center justify-center">
+            <span className="text-xl font-black tracking-widest text-zinc-900">
+              VS
+            </span>
+          </div>
+        </div>
       </div>
 
       <SearchModal 
