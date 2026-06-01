@@ -161,11 +161,11 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useRouter } from "next/navigation";
 import CompareAddButton from "@/components/atoms/CompareAddButton";
 import CompareCard from "@/components/molecules/CompareCard";
 import SearchModal from "@/components/molecules/SearchModal";
 import { useCompareStore } from "@/store/useCompareStore";
+import InfoModal from "@/components/molecules/InfoModal";
 
 const MAX_SLOTS = 2;
 
@@ -358,8 +358,21 @@ function parseAnalysisData(rawFood: any) {
   return [];
 }
 
+
+
 function CompareContent() {
-  const { selectedFoods, addFood, removeFood } = useCompareStore();
+  const { selectedFoods, addFood, removeFood, replaceFood, clearFoods } = useCompareStore();
+
+  const [replaceSlotIndex, setReplaceSlotIndex] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [infoModalTitle, setInfoModalTitle] = useState("");
+  const [infoModalMessage, setInfoModalMessage] = useState("");
+  const [infoModalType, setInfoModalType] = useState<"success" | "error" | "warning">("success");
+
+  const [pendingAction, setPendingAction] = useState<"clear" | null>(null);
+
   const validFoods = selectedFoods.filter(
     
     (food):food is NonNullable<typeof food> => food !== null
@@ -419,8 +432,7 @@ function CompareContent() {
       : rightParsedNutrients;
 
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
 
   // 💡 3. 모달에서 추가 시 실시간 단독 상세 fetch 및 가공 바인딩
   const handleAddFood = async (lightFood: any) => {
@@ -439,14 +451,59 @@ function CompareContent() {
 
       console.log(fullFood);
       
-      const success = addFood({
+      const compareFood = {
         id: Number(fullFood.id),
-        name: fullFood.nameKo ?? fullFood.name,
-        brand: fullFood.brandKo ?? fullFood.brand,
-      });
+        name: fullFood.nameKo,
+        brand: fullFood.brandEn,
+      };
+
+      let success = false;
+
+      if (replaceSlotIndex !== null) {
+        success = replaceFood(
+          replaceSlotIndex,
+          compareFood
+        );
+
+        if (success) {
+          setInfoModalTitle("교체 완료");
+
+          setInfoModalMessage(
+            `${compareFood.name} 사료로 교체되었습니다.`
+
+          );
+
+          setInfoModalType("success");
+
+          setInfoModalOpen(true);
+        }
+
+        setReplaceSlotIndex(null);
+
+      } else {
+        success = addFood(compareFood);
+
+        setInfoModalTitle("추가 완료");
+
+        setInfoModalMessage(
+          `${compareFood.name} 사료가 비교 슬롯에 추가되었습니다.`
+        );
+
+        setInfoModalType("success");
+
+        setInfoModalOpen(true);
+      }
 
       if (!success) {
-        alert("이미 추가된 사료이거나 비교 슬롯이 가득 찼습니다.");
+        setInfoModalTitle("추가 실패");
+
+        setInfoModalMessage(
+          "이미 추가된 사료이거나 비교 슬롯이 가득 찼습니다."
+        );
+
+        setInfoModalType("error");
+
+        setInfoModalOpen(true);
       }
     } catch (error) {
       console.error("비교 데이터 바인딩 오류:", error);
@@ -459,13 +516,52 @@ function CompareContent() {
   return (
     <div className="space-y-10 pb-12 animate-fade-in w-full">
       <header className="text-center space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black">
+        {/* <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black">
           사료 비교하기
-        </h1>
-        <p className="text-sm text-zinc-500 font-light">
+        </h1> */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-zinc-900">
+            사료 비교
+          </h1>
+
+          <p className="text-sm text-zinc-500 mt-2">
+            최대 2개의 사료를 선택하여 영양 성분 비율과 특징을 한눈에 대조해보세요.
+          </p>
+
+
+        </div>
+        {/* <p className="text-sm text-zinc-500 font-light">
           최대 2개의 사료를 선택하여 영양 성분 비율과 특징을 한눈에 대조해보세요.
-        </p>
+        </p> */}
       </header>
+
+      <div className="flex items-center justify-between mt-4">
+        <span className="text-sm text-zinc-500">
+          선택된 사료{" "}
+          <span className="font-semibold text-zinc-900">
+            {validFoods.length}
+          </span>
+          {" / "}2
+        </span>
+
+        {validFoods.length > 0 && (
+          <button
+            onClick={() => {
+              setInfoModalTitle("비우기");
+              setInfoModalMessage(
+                "비교 바구니를 모두 비우시겠습니까?"
+              );
+              setInfoModalType("warning");
+              setPendingAction("clear");
+              setInfoModalOpen(true);
+            }}
+            className="text-sm text-zinc-500 hover:text-red-500 transition"
+          >
+            전체 비우기
+          </button>
+        )}
+      </div>
+      
       <div className="relative">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[...Array(MAX_SLOTS)].map((_, index) => {
@@ -485,6 +581,10 @@ function CompareContent() {
                     featureTags={createFeatureTags(foodItem)}
                     nutrients={index === 0 ? leftNutrients : rightNutrients}
                     onRemove={() => removeFood(index)}
+                    onReplace={() => {
+                      setReplaceSlotIndex(index);
+                      setIsModalOpen(true);
+                    }}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center space-y-3 text-center">
@@ -512,6 +612,21 @@ function CompareContent() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onAdd={handleAddFood} 
+      />
+
+      <InfoModal
+        isOpen={infoModalOpen}
+        title={infoModalTitle}
+        description={infoModalMessage}
+        type={infoModalType}
+        onConfirm={() => {
+          if (pendingAction === "clear") {
+            clearFoods();
+          }
+
+          setPendingAction(null);
+          setInfoModalOpen(false);
+        }}
       />
     </div>
   );
