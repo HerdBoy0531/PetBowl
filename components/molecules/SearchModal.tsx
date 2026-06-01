@@ -162,6 +162,7 @@ export default function SearchModal({ isOpen, onClose, onAdd }: SearchModalProps
             : (result.foods || result.data || []);
             
           setDbFoods(validArray);
+          console.log("모달테스트",validArray[0]);
         }
       } catch (error) {
         console.error("모달 데이터 로드 실패:", error);
@@ -176,12 +177,23 @@ export default function SearchModal({ isOpen, onClose, onAdd }: SearchModalProps
   if (!isOpen) return null;
 
   // 🔍 입력한 키워드에 맞춰 실시간으로 제조사/제품명 필터링 (배열 안전장치 포함)
+  // const filteredResults = Array.isArray(dbFoods)
+  //   ? dbFoods.filter(
+  //       (item) =>
+  //         item.nameKo?.toLowerCase().includes(search.toLowerCase()) ||
+  //         item.brandEn?.toLowerCase().includes(search.toLowerCase())
+  //     )
+  //   : [];
+
   const filteredResults = Array.isArray(dbFoods)
-    ? dbFoods.filter(
-        (item) =>
-          item.name?.toLowerCase().includes(search.toLowerCase()) ||
-          item.brand?.toLowerCase().includes(search.toLowerCase())
-      )
+    ? dbFoods.filter((item) => {
+        if (!search.trim()) return true;
+
+        return (
+          item.nameKo?.toLowerCase().includes(search.toLowerCase()) ||
+          item.brandEn?.toLowerCase().includes(search.toLowerCase())
+        );
+      })
     : [];
 
   // 💡 [핵심 교정] 부모 함수가 크래시 나더라도 모달은 무조건 닫히도록 제어하는 안전 브릿지 함수
@@ -198,6 +210,8 @@ export default function SearchModal({ isOpen, onClose, onAdd }: SearchModalProps
     }
   };
 
+  
+  console.log("filteredResults", filteredResults);
   return (
     // 전체 모달 백그라운드 블러 오버레이
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm p-4 animate-fade-in">
@@ -243,9 +257,9 @@ export default function SearchModal({ isOpen, onClose, onAdd }: SearchModalProps
               >
                 <div className="min-w-0 flex-1">
                   <span className="text-[10px] font-bold text-zinc-400 block uppercase tracking-tight">
-                    {item.brand || "미지정 브랜드"}
+                    {item.brandEn || "미지정 브랜드"}
                   </span>
-                  <span className="text-sm text-zinc-800 font-medium truncate block">{item.name}</span>
+                  <span className="text-sm text-zinc-800 font-medium truncate block">{item.nameKo}</span>
                 </div>
                 <Button 
                   variant="outline" 
