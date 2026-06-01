@@ -103,8 +103,11 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+
 import FoodDetailReport from "@/components/organisms/FoodDetailReport";
 import PriceActionCard from "@/components/organisms/PriceActionCard";
+import RecommendedFoodsSection from "@/components/organisms/RecommendedFoodsSection";
+
 import { useCompareStore } from "@/store/useCompareStore"; // 💡 Zustand 전역 스토어 수입
 
 interface NutrientAnalysis {
@@ -214,9 +217,15 @@ export default function FoodDetailPage() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-fade-in w-full">
       
       {/* 왼쪽 리포트 판넬 */}
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-2 space-y-6">
         <FoodDetailReport data={food} />
+
+        <RecommendedFoodsSection 
+          currentFoodId={food.id}
+        />
       </div>
+
+
 
       {/* 우측 가격 및 제어 랙 */}
       <div className="lg:sticky lg:top-24">
@@ -228,6 +237,7 @@ export default function FoodDetailPage() {
           onGoBack={() => router.push("/search")}
         />
       </div>
+
 
     </div>
   );

@@ -2,7 +2,6 @@ import Navbar from "@organisms/Navbar";
 import HeroSection from "@organisms/HeroSection";
 import SearchBar from "@molecules/SearchBar";
 import PopularSection from "@organisms/PopularSection";
-import Footer from "@organisms/Footer";
 
 
 export default function HomePage() {
