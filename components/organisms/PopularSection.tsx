@@ -279,8 +279,8 @@ import RankingCard from "@/components/molecules/RankingCard";
 
 interface RankedFood {
   id: number;
-  name: string;
-  brand: string;
+  nameKo: string;
+  brandEn: string;
   viewCount: number;
   mainProtein: string[];
 }
@@ -427,8 +427,8 @@ export default function PopularSection() {
               >
                 <RankingCard
                   index={index}
-                  brand={food.brand}
-                  name={food.name}
+                  brand={food.brandEn}
+                  name={food.nameKo}
                   mainProtein={food.mainProtein || []}
                   viewCount={food.viewCount || 0}
                   onClick={() =>

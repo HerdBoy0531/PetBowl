@@ -108,6 +108,8 @@ import FoodDetailReport from "@/components/organisms/FoodDetailReport";
 import PriceActionCard from "@/components/organisms/PriceActionCard";
 import RecommendedFoodsSection from "@/components/organisms/RecommendedFoodsSection";
 
+import InfoModal from "@/components/molecules/InfoModal";
+
 import { useCompareStore } from "@/store/useCompareStore"; // 💡 Zustand 전역 스토어 수입
 
 interface NutrientAnalysis {
@@ -153,6 +155,13 @@ export default function FoodDetailPage() {
   const [food, setFood] = useState<FoodDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [infoModalTitle, setInfoModalTitle] = useState("");
+  const [infoModalMessage, setInfoModalMessage] = useState("");
+  const [infoModalType, setInfoModalType] = useState<"success" | "error" | "warning">("success");
+
+
   useEffect(() => {
     if (!id) return;
 
@@ -164,7 +173,16 @@ export default function FoodDetailPage() {
           const result = await res.json();
           setFood(result);
         } else {
-          alert("존재하지 않거나 삭제된 사료 정보입니다.");
+          setInfoModalTitle("사료 정보 없음");
+
+          setInfoModalMessage(
+            "존재하지 않거나 삭제된 사료 정보입니다."
+          );
+
+          setInfoModalType("error");
+
+          setInfoModalOpen(true);
+
           router.push("/search");
         }
       } catch (error) {
@@ -194,10 +212,26 @@ export default function FoodDetailPage() {
     const success = addFood(foodToStore);
 
     if (success) {
-      alert(`[${food.brandEn}] ${food.nameKo}\n사료 비교 바구니에 정상 장착되었습니다!`);
+      setInfoModalTitle("추가 완료");
+
+      setInfoModalMessage(
+        `[${food.brandEn}] ${food.nameKo}\n사료 비교 바구니에 정상 추가되었습니다!`
+      );
+
+      setInfoModalType("success");
+
+      setInfoModalOpen(true);
     } else {
       // 스토어 내부 분기(중복이거나 2개 초과)일 때 예외 안내 처리
-      alert("이미 담긴 사료이거나 비교 슬롯(최대 2개)이 꽉 찼습니다.\n비교 페이지나 우측 독 위젯에서 비워주세요.");
+      setInfoModalTitle("추가 불가");
+
+      setInfoModalMessage(
+        "이미 담긴 사료이거나 비교 슬롯(최대 2개)이 꽉 찼습니다.\n비교 페이지나 비교 바구니에서 비워주세요."
+      );
+
+      setInfoModalType("error");
+
+      setInfoModalOpen(true);
     }
   };
 
@@ -238,6 +272,15 @@ export default function FoodDetailPage() {
         />
       </div>
 
+      <InfoModal
+        isOpen={infoModalOpen}
+        title={infoModalTitle}
+        description={infoModalMessage}
+        type={infoModalType}
+        onConfirm={() => {
+          setInfoModalOpen(false);
+        }}
+      />
 
     </div>
   );

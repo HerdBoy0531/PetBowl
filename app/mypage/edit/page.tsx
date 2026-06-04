@@ -2,11 +2,19 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import EditProfileForm from "@/components/organisms/EditProfileForm"; // 유기체 임포트
+import InfoModal from "@/components/molecules/InfoModal";
 
 export default function MyPageEdit() {
   const { data: session, update: updateSession, status } = useSession();
   const router = useRouter();
+
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [infoModalTitle, setInfoModalTitle] = useState("");
+  const [infoModalMessage, setInfoModalMessage] = useState("");
+  const [infoModalType, setInfoModalType] = useState<"success" | "error" | "warning">("success");
 
   if (status === "loading") {
     return <div className="py-40 text-center text-zinc-400 text-sm animate-pulse">인증 상태 조회 중...</div>;
@@ -34,7 +42,18 @@ export default function MyPageEdit() {
     // 🔄 NextAuth 세션 내부 가드를 강제 업데이트하여 전역 네비바 동기화
     await updateSession({ nickname: newNickname });
     
-    alert("집사 프로필 정보가 정상 수정되었습니다. 🥣");
+    if (res.status === 200) {
+      setInfoModalTitle("수정 완료");
+
+      setInfoModalMessage(
+        "보호자님의 프로필 정보가 정상 수정되었습니다."
+
+      );
+
+      setInfoModalType("success");
+
+      setInfoModalOpen(true);
+    }
     router.push("/mypage");
     router.refresh();
   };

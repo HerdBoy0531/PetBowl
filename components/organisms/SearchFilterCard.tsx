@@ -211,6 +211,27 @@ export default function SearchFilterCard({ filters, onFilterChange }: SearchFilt
         }}
       />
 
+      {filters.search && (
+        <div className="px-5 py-4 border-t border-zinc-100 bg-zinc-50/50">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-zinc-500">
+              현재 검색어
+            </span>
+
+            <button
+              onClick={() =>
+                onFilterChange({
+                  search: "",
+                })
+              }
+              className=" inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full bg-white border border-zinc-200 hover:bg-zinc-50 transition"
+            >
+              {filters.search}
+              <span className="text-zinc-400">✕</span>
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

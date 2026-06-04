@@ -93,10 +93,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import FormField from "@/components/molecules/FormField";
 import Button from "@/components/atoms/Button";
 import TextArea from "@/components/atoms/TextArea";
 import Input from "@/components/atoms/Input";
+import InfoModal from "@/components/molecules/InfoModal";
 
 interface RequestFormProps {
   id?: string; // id가 전달되면 자동으로 '수정 모드'로 가동됩니다.
@@ -108,6 +110,12 @@ export default function RequestForm({ id, onSuccess, onCancel }: RequestFormProp
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [infoModalTitle, setInfoModalTitle] = useState("");
+  const [infoModalMessage, setInfoModalMessage] = useState("");
+  const [infoModalType, setInfoModalType] = useState<"success" | "error" | "warning">("success");
+
   const isUpdate = !!id;
 
   // 🔄 수정 모드일 때, 백엔드로부터 기존 원본 글 데이터 Fetching 바인딩
@@ -151,15 +159,54 @@ export default function RequestForm({ id, onSuccess, onCancel }: RequestFormProp
       });
 
       if (res.ok) {
-        alert(isUpdate ? "성공적으로 수정되었습니다." : "요청사항이 안전하게 등록되었습니다.");
+        if (isUpdate) {
+          setInfoModalTitle("수정 완료");
+
+          setInfoModalMessage(
+            "성공적으로 수정되었습니다."
+          );
+
+          setInfoModalType("success");
+
+          setInfoModalOpen(true);
+        } else {
+          setInfoModalTitle("등록 완료");
+
+          setInfoModalMessage(
+            "요청사항이 안전하게 등록되었습니다."
+          );
+
+          setInfoModalType("success");
+
+          setInfoModalOpen(true);
+        }
+
         onSuccess();
       } else {
-        const errorData = await res.json();
-        alert(errorData.message || "작업 처리 중 오류가 발생했습니다.");
+        //const errorData = await res.json();
+        //alert(errorData.message || "작업 처리 중 오류가 발생했습니다.");
+
+        setInfoModalTitle("작업 오류");
+
+        setInfoModalMessage(
+          "작업 처리 중 오류가 발생했습니다."
+        );
+
+        setInfoModalType("error");
+
+        setInfoModalOpen(true);
       }
     } catch (error) {
       console.error("API 전송 에러:", error);
-      alert("서버 연결에 실패했습니다.");
+      setInfoModalTitle("작업 오류");
+
+      setInfoModalMessage(
+        "서버 연결에 실패했습니다."
+      );
+
+      setInfoModalType("error");
+
+      setInfoModalOpen(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -233,6 +280,16 @@ export default function RequestForm({ id, onSuccess, onCancel }: RequestFormProp
         </div>
       </form>
 
+      <InfoModal
+        isOpen={infoModalOpen}
+        title={infoModalTitle}
+        description={infoModalMessage}
+        type={infoModalType}
+        onConfirm={() => {
+          setInfoModalOpen(false);
+        }}
+      />
+      
     </div>
   );
 }

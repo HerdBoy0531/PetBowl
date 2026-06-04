@@ -507,7 +507,17 @@ function CompareContent() {
       }
     } catch (error) {
       console.error("비교 데이터 바인딩 오류:", error);
-      alert("사료의 영양 성분 데이터를 불러오는 중 문제가 발생했습니다.");
+      if(error) {
+        setInfoModalTitle("오류 발생");
+
+        setInfoModalMessage(
+          "사료의 영양 성분 데이터를 불러오는 중 문제가 발생했습니다."
+        );
+        
+        setInfoModalType("error");
+
+        setInfoModalOpen(true);
+      }
     } finally {
       setIsModalOpen(false);
     }
