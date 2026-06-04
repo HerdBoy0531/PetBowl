@@ -96,7 +96,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+
 import { useCompareStore } from "@/store/useCompareStore";
 
 
@@ -110,10 +113,15 @@ export default function GlobalCompareDock() {
 
   const validFoods = selectedFoods.filter(Boolean);
 
-  if (validFoods.length === 0) return null;
+  const pathname = usePathname();
 
-  console.log(selectedFoods);
-  console.log(validFoods);
+  if (pathname.startsWith("/search") || pathname.startsWith("/foods")) {
+    
+  } else {
+    return null;
+  }
+
+  if (validFoods.length === 0) return null;
 
   const canCompare = validFoods.length === 2;
 
@@ -122,23 +130,24 @@ export default function GlobalCompareDock() {
       className="fixed right-6 bottom-8 z-50 w-64 md:w-72"
       initial={{ y: 100 }}
       animate={{ y: 0 }}
-      layout
     >
       {/* 토글 버튼 (패널 상단에 배치) */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white border border-zinc-200 px-4 py-1.5 rounded-t-xl font-bold text-[10px] uppercase tracking-widest shadow-sm hover:bg-zinc-50 transition-colors"
+        className="absolute -top-10 -translate-x-1/2 left-1/2 bg-white border border-zinc-200 px-4 py-1.5 rounded-t-xl font-bold text-[10px] uppercase tracking-widest shadow-sm hover:bg-zinc-50 transition-colors"
       >
         비교 바구니 {isOpen ? "▼" : "▲"}
       </button>
 
-      <AnimatePresence>
+      {/* <AnimatePresence mode="wait"> */}
         {isOpen && (
           <motion.div 
             className="bg-white/95 backdrop-blur-md border border-zinc-200/80 rounded-2xl p-4 shadow-xl flex flex-col gap-3"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.98 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+
           >
             <div className="flex justify-between items-center border-b border-zinc-100 pb-2">
               <h5 className="text-xs font-bold text-zinc-700 tracking-tight">선택된 사료</h5>
@@ -149,7 +158,7 @@ export default function GlobalCompareDock() {
 
             <div className="flex flex-col gap-2 w-full">
               {[0, 1].map((index) => {
-                const food = validFoods[index];
+                const food = selectedFoods[index];
                 return (
                   <div key={index} className={`flex items-center justify-between gap-2 px-3 py-2.5 text-xs rounded-xl border transition-all ${food ? "bg-zinc-50 border-zinc-200/60" : "bg-white border-dashed border-zinc-200 text-zinc-300 justify-center"}`}>
                     {food ? (
@@ -177,7 +186,7 @@ export default function GlobalCompareDock() {
             </button>
           </motion.div>
         )}
-      </AnimatePresence>
+      {/* </AnimatePresence> */}
     </motion.div>
   );
 }

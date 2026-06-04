@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import Link from "next/link";
+
+import InfoModal from "@/components/molecules/InfoModal";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -11,6 +14,12 @@ export default function RegisterPage() {
     nickname: "",
     password: "",
   });
+
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [infoModalTitle, setInfoModalTitle] = useState("");
+  const [infoModalMessage, setInfoModalMessage] = useState("");
+  const [infoModalType, setInfoModalType] = useState<"success" | "error" | "warning">("success");
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,11 +30,29 @@ export default function RegisterPage() {
     });
 
     if (response.ok) {
-      alert("회원가입이 완료되었습니다!");
-      router.push("/login");
+
+      setInfoModalTitle("회원가입 완료");
+
+      setInfoModalMessage(
+        "회원가입이 완료되었습니다."
+      );
+
+      setInfoModalType("success");
+
+      setRedirectPath("/login");
+
+      setInfoModalOpen(true);
     } else {
       const error = await response.text();
-      alert(error);
+      setInfoModalTitle("회원가입 실패");
+
+      setInfoModalMessage(
+        `${error}`
+      );
+
+      setInfoModalType("success");
+
+      setInfoModalOpen(true);
     }
   };
 
@@ -89,6 +116,20 @@ export default function RegisterPage() {
           </p>
         </div>
       </div>
+
+      <InfoModal
+        isOpen={infoModalOpen}
+        title={infoModalTitle}
+        description={infoModalMessage}
+        type={infoModalType}
+        onConfirm={() => {
+          if (redirectPath) {
+            router.push(redirectPath);
+          }
+
+          setInfoModalOpen(false);
+        }}
+      />
     </div>
   );
 }

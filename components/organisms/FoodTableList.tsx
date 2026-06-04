@@ -328,8 +328,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import FoodResultItem from "@molecules/FoodResultItem";
 import Input from "@/components/atoms/Input";
+import InfoModal from "@/components/molecules/InfoModal";
+
 import { useCompareStore } from "@/store/useCompareStore";
 
 // import CompareStickyDock from "./CompareStickyDock"; // 💡 분리된 플로팅 바 수입
@@ -375,6 +378,11 @@ export default function FoodTableList({
   // const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [localSearch, setLocalSearch] = useState("");
 
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [infoModalTitle, setInfoModalTitle] = useState("");
+  const [infoModalMessage, setInfoModalMessage] = useState("");
+  const [infoModalType, setInfoModalType] = useState<"success" | "error" | "warning">("success");
+
 
   const {
     selectedFoods,
@@ -401,7 +409,15 @@ export default function FoodTableList({
     });
 
     if (!success) {
-      alert("이미 추가된 사료이거나 비교 슬롯이 가득 찼습니다.");
+        setInfoModalTitle("사료 추가 실패");
+
+        setInfoModalMessage(
+          "이미 추가된 사료이거나 비교 슬롯이 가득 찼습니다."
+        );
+
+        setInfoModalType("error");
+
+        setInfoModalOpen(true);
     }
   };
 
@@ -519,6 +535,16 @@ export default function FoodTableList({
           </button>
         </div>
       )}
+
+      <InfoModal
+        isOpen={infoModalOpen}
+        title={infoModalTitle}
+        description={infoModalMessage}
+        type={infoModalType}
+        onConfirm={() => {
+          setInfoModalOpen(false);
+        }}
+      />
     </div>
   );
 }

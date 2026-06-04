@@ -44,8 +44,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+
 import Button from "@/components/atoms/Button";
 import RequestForm from "@/components/organisms/RequestForm"; // 앞서 바인딩한 폼 수입
+import InfoModal from "@/components/molecules/InfoModal";
 
 interface DetailPost {
   id: number;
@@ -68,6 +70,12 @@ export default function RequestDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false); // 수정 폼 전환 토글 스위치
 
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [infoModalTitle, setInfoModalTitle] = useState("");
+  const [infoModalMessage, setInfoModalMessage] = useState("");
+  const [infoModalType, setInfoModalType] = useState<"success" | "error" | "warning">("success");
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
+
   // 🔄 1. 특정 글 상세 데이터 실시간 Fetching
   const fetchPostDetail = async () => {
     try {
@@ -76,8 +84,17 @@ export default function RequestDetailPage() {
         const data = await res.json();
         setPost(data);
       } else {
-        alert("존재하지 않거나 삭제된 게시글입니다.");
-        router.push("/request");
+        setInfoModalTitle("게시물 오류");
+
+        setInfoModalMessage(
+          "존재하지 않거나 삭제된 게시글입니다."
+        );
+
+        setInfoModalType("error");
+
+        setRedirectPath("/request");
+
+        setInfoModalOpen(true);
       }
     } catch (error) {
       console.error("상세조회 실패:", error);
@@ -100,8 +117,18 @@ export default function RequestDetailPage() {
       });
 
       if (res.ok) {
-        alert("성공적으로 삭제되었습니다.");
-        router.push("/request"); // 삭제 후 목록으로 안전 리다이렉트
+        setInfoModalTitle("게시물 삭제 성공");
+
+        setInfoModalMessage(
+          "성공적으로 삭제되었습니다."
+        );
+
+        setInfoModalType("success");
+
+        setRedirectPath("/request"); // 삭제 후 목록으로 안전 리다이렉트
+
+        setInfoModalOpen(true);
+
       } else {
         const err = await res.json();
         alert(err.message || "삭제 중 오류가 발생했습니다.");
@@ -230,6 +257,19 @@ export default function RequestDetailPage() {
           </p>
         </section>
       )}
+
+      <InfoModal
+        isOpen={infoModalOpen}
+        title={infoModalTitle}
+        description={infoModalMessage}
+        type={infoModalType}
+        onConfirm={() => {
+          if (redirectPath) {
+            router.push(redirectPath);
+          }
+          setInfoModalOpen(false);
+        }}
+      />
 
     </div>
   );

@@ -13,17 +13,17 @@ export default function RankingCard({ index, brand, name, mainProtein, viewCount
   return (
     <div
       onClick={onClick}
-      className="flex items-center justify-between p-4 md:p-5 bg-white border-2 border-black rounded-2xl hover:bg-zinc-50 transition-all cursor-pointer group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px]"
+      className="flex items-center justify-between p-4 md:p-5 bg-white border border-zinc-100 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group"
     >
       <div className="flex items-center gap-5">
         {/* 순위 넘버링 */}
-        <span className={`font-black text-xl md:text-2xl w-10 text-center font-mono ${index === 0 ? "text-amber-500" : index === 1 ? "text-zinc-500" : index === 2 ? "text-amber-800" : "text-zinc-300"}`}>
+        <span className={`font-black text-xl md:text-2xl w-10 text-center font-bold tracking-tight ${index === 0 ? "text-amber-500" : index === 1 ? "text-zinc-500" : index === 2 ? "text-amber-800" : "text-zinc-300"}`}>
           0{index + 1}
         </span>
         
         {/* 정보 영역 */}
         <div className="space-y-1">
-          <span className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200">
+          <span className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase bg-zinc-50 px-2 py-0.5 rounded-md border border-zinc-100">
             {brand}
           </span>
           <h4 className="text-sm md:text-base font-bold text-zinc-900 group-hover:underline underline-offset-4 decoration-2">
