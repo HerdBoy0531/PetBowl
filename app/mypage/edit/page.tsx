@@ -15,6 +15,7 @@ export default function MyPageEdit() {
   const [infoModalTitle, setInfoModalTitle] = useState("");
   const [infoModalMessage, setInfoModalMessage] = useState("");
   const [infoModalType, setInfoModalType] = useState<"success" | "error" | "warning">("success");
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
   if (status === "loading") {
     return <div className="py-40 text-center text-zinc-400 text-sm animate-pulse">인증 상태 조회 중...</div>;
@@ -53,9 +54,9 @@ export default function MyPageEdit() {
       setInfoModalType("success");
 
       setInfoModalOpen(true);
+
+      setRedirectPath("/mypage");
     }
-    router.push("/mypage");
-    router.refresh();
   };
 
   return (
@@ -63,9 +64,9 @@ export default function MyPageEdit() {
       
       {/* 헤더 안내판 */}
       <header className="space-y-1 text-center">
-        <h1 className="text-xl font-bold tracking-tight text-black">집사 프로필 수정</h1>
+        <h1 className="text-xl font-bold tracking-tight text-black">보호자님 프로필 수정</h1>
         <p className="text-xs text-zinc-400 font-light">
-          PetBowl 안심 게시판과 비교 보드에서 사용할 집사 이름을 정돈합니다.
+          PetBowl 안심 게시판과 비교 보드에서 사용할 보호자님 이름을 정돈합니다.
         </p>
       </header>
 
@@ -74,6 +75,21 @@ export default function MyPageEdit() {
         initialNickname={currentNickname}
         onSave={handleSaveProfile}
         onCancel={() => router.push("/mypage")}
+      />
+
+      <InfoModal
+        isOpen={infoModalOpen}
+        title={infoModalTitle}
+        description={infoModalMessage}
+        type={infoModalType}
+        onConfirm={() => {
+          if (redirectPath) {
+            router.push(redirectPath);
+            router.refresh();
+          }
+
+          setInfoModalOpen(false);
+        }}
       />
 
     </div>

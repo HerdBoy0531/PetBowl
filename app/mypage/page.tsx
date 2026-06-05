@@ -11,7 +11,7 @@ export default function MyPage() {
   const router = useRouter();
 
   if (status === "loading") {
-    return <div className="py-40 text-center text-zinc-400 text-sm animate-pulse">집사 세션 스캔 중...</div>;
+    return <div className="py-40 text-center text-zinc-400 text-sm animate-pulse">보호자님 세션 스캔 중...</div>;
   }
 
   if (status === "unauthenticated") {

@@ -75,6 +75,7 @@ export default function RequestDetailPage() {
   const [infoModalMessage, setInfoModalMessage] = useState("");
   const [infoModalType, setInfoModalType] = useState<"success" | "error" | "warning">("success");
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<"delete" | null>(null);
 
   // 🔄 1. 특정 글 상세 데이터 실시간 Fetching
   const fetchPostDetail = async () => {
@@ -109,8 +110,6 @@ export default function RequestDetailPage() {
 
   // ❌ 2. 게시글 삭제 핸들러 (서버 검증 레이어 가동)
   const handleDelete = async () => {
-    if (!window.confirm("정말 이 요청사항을 삭제하시겠습니까?")) return;
-
     try {
       const res = await fetch(`/api/request/${id}`, {
         method: "DELETE",
@@ -125,17 +124,40 @@ export default function RequestDetailPage() {
 
         setInfoModalType("success");
 
-        setRedirectPath("/request"); // 삭제 후 목록으로 안전 리다이렉트
+        setRedirectPath("/request");
+
+        setPendingAction(null);
 
         setInfoModalOpen(true);
-
       } else {
         const err = await res.json();
-        alert(err.message || "삭제 중 오류가 발생했습니다.");
+
+        setInfoModalTitle("삭제 실패");
+
+        setInfoModalMessage(
+          err.message || "삭제 중 오류가 발생했습니다."
+        );
+
+        setInfoModalType("error");
+
+        setPendingAction(null);
+
+        setInfoModalOpen(true);
       }
     } catch (error) {
       console.error("삭제 요청 실패:", error);
-      alert("서버와 통신에 실패했습니다.");
+
+      setInfoModalTitle("서버 오류");
+
+      setInfoModalMessage(
+        "서버와 통신에 실패했습니다."
+      );
+
+      setInfoModalType("error");
+
+      setPendingAction(null);
+
+      setInfoModalOpen(true);
     }
   };
 
@@ -236,7 +258,15 @@ export default function RequestDetailPage() {
               </Button>
               <Button
                 variant="outline"
-                onClick={handleDelete}
+                onClick={() => {
+                  setInfoModalTitle("게시물 삭제");
+                  setInfoModalMessage(
+                    "정말 이 요청사항을 삭제하시겠습니까?"
+                  );
+                  setInfoModalType("warning");
+                  setPendingAction("delete");
+                  setInfoModalOpen(true);
+                }}
                 className="text-xs py-2 px-4 text-red-500 border-red-100 hover:bg-red-50 hover:border-red-200"
               >
                 삭제
@@ -264,9 +294,16 @@ export default function RequestDetailPage() {
         description={infoModalMessage}
         type={infoModalType}
         onConfirm={() => {
+          if (pendingAction === "delete") {
+            setInfoModalOpen(false);
+            handleDelete();
+            return;
+          }
+
           if (redirectPath) {
             router.push(redirectPath);
           }
+
           setInfoModalOpen(false);
         }}
       />
