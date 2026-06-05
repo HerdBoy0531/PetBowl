@@ -62,6 +62,7 @@ interface RequestPost {
   status : string;
   user : string; // 작성자 정보 (이메일 혹은 ID가 적재되는 필드)
   date: string;
+  email: string;
 }
 
 export default function RequestBoard() {
@@ -92,9 +93,10 @@ export default function RequestBoard() {
     fetchRequests();
   }, []);
 
+
   // 💡 [개인 필터링 엔진] '내가 쓴 글' 모드일 때는 세션 이메일과 매칭되는 글만 솎아냅니다.
   const displayedRequests = isMineFilter && session?.user?.email
-    ? requests.filter((req) => req.user === session.user.email)
+    ? requests.filter((req) => req.email === session.user.email)
     : requests;
 
   return (
@@ -106,7 +108,7 @@ export default function RequestBoard() {
         </h2>
         <p className="text-sm text-zinc-500 font-light">
           {isMineFilter 
-            ? "집사님이 PetBowl에 남겨주신 소중한 의견들과 어드민 처리 현황입니다."
+            ? "보호자님이 PetBowl에 남겨주신 소중한 의견들과 처리 현황입니다."
             : "PetBowl에 추가되길 원하는 사료나 성분 분석, 서비스 개선 의견을 편하게 들려주세요."}
         </p>
       </div>
@@ -129,7 +131,7 @@ export default function RequestBoard() {
           ) : displayedRequests.length === 0 ? (
             <div className="py-12 text-center text-zinc-400 font-light">
               {isMineFilter 
-                ? "집사님이 아직 등록하신 요청사항이 존재하지 않습니다." 
+                ? "보호자님이 아직 등록하신 요청사항이 존재하지 않습니다." 
                 : "아직 등록된 요청사항이 없습니다. 첫 번째 의견을 남겨보세요!"}
             </div>
           ) : (

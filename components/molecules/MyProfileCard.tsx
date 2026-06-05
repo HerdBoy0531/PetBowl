@@ -30,7 +30,7 @@ export default function MyProfileCard({ user, onSignOut }: MyProfileCardProps) {
         <div className="space-y-1.5">
           <div className="flex items-center justify-center sm:justify-start gap-2">
             <h2 className="text-xl font-bold text-black tracking-tight">
-              {user?.nickname || user?.name || "안심집사"}
+              {user?.nickname || user?.name || "안심 보호자"}
             </h2>
             {/* 권한 배지 */}
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md tracking-wider ${

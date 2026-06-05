@@ -42,7 +42,7 @@ export default function EditProfileForm({ initialNickname, onSave, onCancel }: E
       {/* 인풋 입력 필드 구획 */}
       <div className="space-y-2">
         <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
-          집사 닉네임
+          보호자님 닉네임
         </label>
         <Input 
           value={nickname}

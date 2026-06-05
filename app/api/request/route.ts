@@ -15,6 +15,7 @@ export async function GET(req: Request) {
         user: {
           select: {
             nickname: true, // 작성자 닉네임만 선택 조인
+            email: true,
           },
         },
       },
@@ -25,8 +26,11 @@ export async function GET(req: Request) {
       id: req.id,
       title: req.title,
       content: req.content,
-      status: req.status, // PENDING, PROCESSING, COMPLETED
-      user: req.user?.nickname || "탈퇴한 회원",
+      status: req.status,
+
+      nickname: req.user?.nickname || "탈퇴한 회원",
+      email: req.user?.email || "",
+
       date: req.createdAt.toISOString().split("T")[0],
     }));
 

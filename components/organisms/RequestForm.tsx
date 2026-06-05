@@ -93,6 +93,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import FormField from "@/components/molecules/FormField";
 import Button from "@/components/atoms/Button";
@@ -115,8 +116,10 @@ export default function RequestForm({ id, onSuccess, onCancel }: RequestFormProp
   const [infoModalTitle, setInfoModalTitle] = useState("");
   const [infoModalMessage, setInfoModalMessage] = useState("");
   const [infoModalType, setInfoModalType] = useState<"success" | "error" | "warning">("success");
+  const [shouldRunSuccess, setShouldRunSuccess] = useState(false);
 
   const isUpdate = !!id;
+  const router = useRouter();
 
   // 🔄 수정 모드일 때, 백엔드로부터 기존 원본 글 데이터 Fetching 바인딩
   useEffect(() => {
@@ -161,27 +164,15 @@ export default function RequestForm({ id, onSuccess, onCancel }: RequestFormProp
       if (res.ok) {
         if (isUpdate) {
           setInfoModalTitle("수정 완료");
-
-          setInfoModalMessage(
-            "성공적으로 수정되었습니다."
-          );
-
-          setInfoModalType("success");
-
-          setInfoModalOpen(true);
+          setInfoModalMessage("성공적으로 수정되었습니다.");
         } else {
           setInfoModalTitle("등록 완료");
-
-          setInfoModalMessage(
-            "요청사항이 안전하게 등록되었습니다."
-          );
-
-          setInfoModalType("success");
-
-          setInfoModalOpen(true);
+          setInfoModalMessage("요청사항이 안전하게 등록되었습니다.");
         }
 
-        onSuccess();
+        setInfoModalType("success");
+        setShouldRunSuccess(true);
+        setInfoModalOpen(true);
       } else {
         //const errorData = await res.json();
         //alert(errorData.message || "작업 처리 중 오류가 발생했습니다.");
@@ -287,6 +278,11 @@ export default function RequestForm({ id, onSuccess, onCancel }: RequestFormProp
         type={infoModalType}
         onConfirm={() => {
           setInfoModalOpen(false);
+
+          if (shouldRunSuccess) {
+            setShouldRunSuccess(false);
+            onSuccess();
+          }
         }}
       />
       

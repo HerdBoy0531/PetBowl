@@ -61,6 +61,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import RequestStatusBadge from "@/components/molecules/RequestStatusBadge";
 
 interface RequestRowProps {
@@ -74,10 +75,13 @@ export default function RequestRow({ id, title, status, createdAt }: RequestRowP
   const { data: session } = useSession();
   const user = session?.user as any;
   const isAdmin = user?.role === "ADMIN";
+  const router = useRouter();
 
   return (
     // 💡 [공간 재배치 2] 부모 헤더 기둥과 완전히 일치하는 너비 배열을 투입해 수직 붕괴를 영구 방지합니다.
-    <div className="grid grid-cols-[60px_1fr_120px_100px] items-center py-4 text-zinc-800 border-b border-zinc-100 last:border-b-0 w-full gap-4">
+    <div
+      onClick={() => router.push(`/request/${id}`)}
+      className="grid grid-cols-[60px_1fr_120px_100px] items-center py-4 text-zinc-800 border-b border-zinc-100 last:border-b-0 w-full gap-4 cursor-pointer hover:bg-zinc-50 transition-colors">
       
       {/* 1. 번호 (딱 60px 공간만 할당받아 콤팩트화) */}
       <span className="text-sm font-light text-zinc-400 font-mono">
@@ -99,7 +103,9 @@ export default function RequestRow({ id, title, status, createdAt }: RequestRowP
       </span>
       
       {/* 4. 상태 배지 (100px 랙 안에서 정중앙 정렬 유도) */}
-      <div className="shrink-0 flex justify-center">
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="shrink-0 flex justify-center">
         <RequestStatusBadge 
           requestId={id} 
           currentStatus={status} 
