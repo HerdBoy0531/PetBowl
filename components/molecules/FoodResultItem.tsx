@@ -217,7 +217,7 @@ export default function FoodResultItem({
           onToggleAdd();
         }}
         className={`
-          text-xs font-medium px-4 py-2 rounded-xl transition-all tracking-tight shrink-0 border
+          text-xs font-medium px-4 py-2 rounded-xl transition-all tracking-tight shrink-0 border w-17
           ${
             isAdded
               ? "bg-zinc-900 text-white border-zinc-900 active:scale-95"

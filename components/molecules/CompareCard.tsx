@@ -183,7 +183,7 @@ export default function CompareCard({
   onReplace,
 }: CompareCardProps) {
   return (
-    <div className="w-full min-h-[580px] rounded-[36px] bg-[#F7F6F4] border border-zinc-200/70 shadow-sm p-8 flex flex-col animate-fade-in">
+    <div className="w-full min-h-[580px] rounded-[36px] bg-[#F7F6F4] border border-zinc-200/70 shadow-sm p-4 md:p-8 flex flex-col animate-fade-in">
       
       {/* 상단 액션 영역 */}
       <div className="flex items-center justify-between mb-7">
@@ -208,7 +208,7 @@ export default function CompareCard({
           {brand}
         </h2>
 
-        <p className="text-[24px] leading-relaxed text-zinc-600 font-light ">
+        <p className="text-lg md:text-[24px] leading-relaxed text-zinc-600 font-light break-keep">
           {name}
         </p >
       </div>
@@ -256,7 +256,7 @@ export default function CompareCard({
       )}
 
       {/* 영양성분 카드 */}
-      <div className="bg-white/90 border border-zinc-100 rounded-[28px] p-6 shadow-inner space-y-4">
+      <div className="bg-white/90 border border-zinc-100 rounded-[28px] p-4 md:p-6 shadow-inner space-y-4">
         {nutrients.length > 0 ? (
           nutrients.map((n, idx) => (
             <div
