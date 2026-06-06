@@ -116,7 +116,8 @@ export default function RequestBoard() {
       <div className="bg-white border border-zinc-100 rounded-2xl shadow-sm overflow-hidden">
         
         {/* 💡 [공간 재배치 1] 무의미한 균등 배분을 깨고, 제목 영역에 최대 실크로드를 열어줍니다. */}
-        <div className="grid grid-cols-[60px_1fr_120px_100px] items-center py-4 px-5 bg-zinc-50/60 border-b border-zinc-100 text-zinc-500 font-semibold text-xs md:text-sm text-left gap-4">
+        {/* <div className="grid grid-cols-[60px_1fr_120px_100px] items-center py-4 px-5 bg-zinc-50/60 border-b border-zinc-100 text-zinc-500 font-semibold text-xs md:text-sm text-left gap-4"> */}
+        <div className="hidden md:grid grid-cols-[60px_1fr_120px_100px] items-center py-4 px-5 bg-zinc-50/60 border-b border-zinc-100 text-zinc-500 font-semibold text-xs md:text-sm text-left gap-4">
           <span>No.</span>
           <span className="text-zinc-700">내용 (제목)</span>
           <span>작성일자</span>

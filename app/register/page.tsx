@@ -84,7 +84,7 @@ export default function RegisterPage() {
               value={data.nickname}
               onChange={(e) => setData({ ...data, nickname: e.target.value })}
               className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-black outline-none transition-all text-black"
-              placeholder="멋진 주인이름"
+              placeholder="멋진 보호자님"
             />
           </div>
           <div>

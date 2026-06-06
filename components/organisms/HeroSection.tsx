@@ -150,7 +150,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="relative w-full h-[400px] md:h-[480px] bg-zinc-50/50 rounded-3xl border border-zinc-100 flex items-center justify-center overflow-hidden transition-all duration-300">
+    <section className="relative w-full min-h-[430px] md:h-[480px] bg-zinc-50/50 rounded-3xl border border-zinc-100 flex items-center justify-center overflow-hidden transition-all duration-300">
       
       {/* 배경 장식 */}
       <div className="absolute inset-0 opacity-40 pointer-events-none">
@@ -181,11 +181,11 @@ export default function HeroSection() {
             {slides[currentIndex].desc}
           </p>
 
-          <div className="pt-4 flex justify-center">
+          <div className="pt-4 pb-8 md:pb-0 flex justify-center">
             <Button 
               variant="primary" 
               onClick={() => router.push(slides[currentIndex].link)}
-              className="px-8 py-3.5 bg-zinc-900 text-white"
+              className="px-6 md:px-8 py-3 text-sm md:text-base bg-zinc-900 text-white"
             >
               {slides[currentIndex].button}
             </Button>
@@ -194,7 +194,7 @@ export default function HeroSection() {
       </AnimatePresence>
 
       {/* 인디케이터 (클릭 가능) */}
-      <div className="absolute bottom-8 flex gap-2 z-20">
+      <div className="absolute bottom-4 md:bottom-8 flex gap-2 z-20">
         {slides.map((_, index) => (
           <button
             key={index}
