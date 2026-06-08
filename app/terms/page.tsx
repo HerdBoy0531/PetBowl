@@ -30,7 +30,7 @@ export default function TermsPage() {
           <p>2. &ldquo;이용자&rdquo;라 함은 본 약관에 동적 동의하고 서비스를 이용하는 회원 및 비회원을 포함합니다.</p>
         </section>
 
-        {/* 🛡️ 핵심 방어 메커니즘 구획 (개발자 독점 보호막) */}
+
         <section className="bg-zinc-50 border border-zinc-100 rounded-2xl p-5 md:p-6 space-y-3 shadow-inner">
           <h2 className="text-base font-bold text-zinc-950 flex items-center gap-2">
             <span>🚨</span> 제 3 조 (영양 성분 정보의 한계 및 면책고지)

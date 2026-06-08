@@ -1,44 +1,3 @@
-// "use client";
-
-// import { useRouter, useParams } from "next/navigation";
-// import Button from "@atoms/Button";
-
-// export default function RequestDetailPage() {
-//   const router = useRouter();
-//   const { id } = useParams();
-
-//   // 실제로는 여기서 id를 이용해 API 데이터를 호출합니다.
-//   const post = { title: "샘플 제목", content: "샘플 내용입니다.", date: "2025-05-12" };
-
-//   return (
-//     <main className="min-h-screen pt-32 pb-20 bg-gray-50 dark:bg-gray-950 transition-colors">
-//       <div className="max-w-3xl mx-auto p-8 border-4 border-black bg-white dark:bg-gray-900 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
-//         <h2 className="text-2xl font-black mb-4 dark:text-white">{post.title}</h2>
-//         <p className="text-sm text-gray-500 mb-8 border-b-2 border-black pb-2">{post.date}</p>
-        
-//         <div className="min-h-[300px] text-lg dark:text-gray-300">
-//           {post.content}
-//         </div>
-
-//         <div className="flex justify-end gap-4 mt-10">
-//           <Button 
-//             onClick={() => router.push("/request")}
-//             className="bg-white text-black border-2 border-black px-6"
-//           >
-//             목록으로
-//           </Button>
-//           <Button 
-//             onClick={() => router.push(`/request/${id}/update`)}
-//             className="bg-yellow-400 text-black border-2 border-black px-6 font-bold"
-//           >
-//             수정하기
-//           </Button>
-//         </div>
-//       </div>
-//     </main>
-//   );
-// }
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -46,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import Button from "@/components/atoms/Button";
-import RequestForm from "@/components/organisms/RequestForm"; // 앞서 바인딩한 폼 수입
+import RequestForm from "@/components/organisms/RequestForm";
 import InfoModal from "@/components/molecules/InfoModal";
 
 interface DetailPost {
@@ -68,7 +27,7 @@ export default function RequestDetailPage() {
   // 상태 관리
   const [post, setPost] = useState<DetailPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditMode, setIsEditMode] = useState(false); // 수정 폼 전환 토글 스위치
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [infoModalTitle, setInfoModalTitle] = useState("");
@@ -77,7 +36,7 @@ export default function RequestDetailPage() {
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<"delete" | null>(null);
 
-  // 🔄 1. 특정 글 상세 데이터 실시간 Fetching
+  // 특정 글 상세 데이터 실시간 Fetching
   const fetchPostDetail = async () => {
     try {
       const res = await fetch(`/api/request/${id}`, { cache: "no-store" });
@@ -108,7 +67,7 @@ export default function RequestDetailPage() {
     if (id) fetchPostDetail();
   }, [id]);
 
-  // ❌ 2. 게시글 삭제 핸들러 (서버 검증 레이어 가동)
+  // 게시글 삭제 핸들러 (서버 검증 레이어 가동)
   const handleDelete = async () => {
     try {
       const res = await fetch(`/api/request/${id}`, {
@@ -172,7 +131,7 @@ export default function RequestDetailPage() {
 
   if (!post) return null;
 
-  // 🔄 3. 수정 모드 활성화 시: 기존 화면을 폼 컴포넌트로 즉시 인라인 스위칭
+  // 수정 모드 활성화 시: 기존 화면을 폼 컴포넌트로 즉시 인라인 스위칭
   if (isEditMode) {
     return (
       <div className="w-full max-w-2xl mx-auto py-4">
@@ -180,7 +139,7 @@ export default function RequestDetailPage() {
           id={String(post.id)}
           onSuccess={() => {
             setIsEditMode(false);
-            fetchPostDetail(); // 수정 완료 후 데이터 새로고침
+            fetchPostDetail();
           }}
           onCancel={() => setIsEditMode(false)}
         />
@@ -207,7 +166,7 @@ export default function RequestDetailPage() {
     );
   };
 
-  // 🔒 본인 권한 검증 스위치 (글쓴이 본인이거나 role이 ADMIN인 경우만 허용)
+  // 본인 권한 검증 스위치 (글쓴이 본인이거나 role이 ADMIN인 경우만 허용)
   const hasPermission = session?.user?.id === post.userId || session?.user?.role === "ADMIN";
 
   return (
@@ -246,7 +205,7 @@ export default function RequestDetailPage() {
             목록으로
           </Button>
 
-          {/* 💡 권한 분리: 본인이나 어드민에게만 수정/삭제 노출 */}
+          {/* 본인이나 어드민에게만 수정/삭제 노출 */}
           {hasPermission && (
             <div className="flex gap-2">
               <Button
@@ -276,7 +235,7 @@ export default function RequestDetailPage() {
         </div>
       </article>
 
-      {/* 👑 관리자 피드백 서브 패널 (Prisma 스키마의 adminNote 실시간 연동) */}
+      {/* 관리자 피드백 서브 패널 (Prisma 스키마의 adminNote 실시간 연동) */}
       {post.adminNote && (
         <section className="bg-[#FDFCF0] border border-zinc-200/60 rounded-2xl p-5 md:p-6 space-y-3">
           <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500">

@@ -1,11 +1,9 @@
-// app/api/foods/meta/route.ts
-
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    // 1. 데이터 조회 (null 제거 및 정렬 강화)
+    // 데이터 조회 (null 제거 및 정렬 강화)
     const [distinctBrands, distinctSizes] = await Promise.all([
       prisma.food.findMany({
         distinct: ["brandKo", "brandEn"],
@@ -30,7 +28,7 @@ export async function GET() {
       }),
     ]);
 
-    // 2. 메타데이터 구성
+    // 메타데이터 구성
     const metaData = {
       brands: distinctBrands.map((b) => ({
         ko: b.brandKo,

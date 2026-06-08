@@ -9,12 +9,12 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, nickname, password } = body;
 
-    // 1. 필수 값 확인
+    // 필수 값 확인
     if (!email || !nickname || !password) {
       return new NextResponse("필수 정보가 누락되었습니다.", { status: 400 });
     }
 
-    // 2. 이메일 중복 체크
+    // 이메일 중복 체크
     const existingEmail = await prisma.user.findUnique({
       where: { email },
     });
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       return new NextResponse("이미 사용 중인 이메일입니다.", { status: 409 });
     }
 
-    // 3. 닉네임 중복 체크
+    // 닉네임 중복 체크
     const existingNickname = await prisma.user.findUnique({
       where: { nickname },
     });
@@ -30,10 +30,10 @@ export async function POST(request: Request) {
       return new NextResponse("이미 사용 중인 닉네임입니다.", { status: 409 });
     }
 
-    // 4. 비밀번호 암호화 (보안강화)
+    // 비밀번호 암호화 (보안강화)
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // 5. 유저 생성
+    // 유저 생성
     const user = await prisma.user.create({
       data: {
         email,

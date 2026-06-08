@@ -1,55 +1,7 @@
-// "use client"
-
-// import Button from "@atoms/Button";
-// import RequestRow from "@molecules/RequestRow";
-// import TableHead from "@atoms/TableHead";
-// import { useRouter } from "next/navigation";
-
-// const dummyRequests = [
-//   { id: 1, content: "A 브랜드 사료 추가 요청합니다!", date: "2025-05-12" },
-//   { id: 2, content: "영양성분 비교 항목에 오메가3도 넣어주세요.", date: "2025-05-11" },
-// ];
-
-// export default function RequestBoard() {
-//   const router = useRouter();
-
-//   return (
-//     <section className="w-full max-w-6xl mx-auto p-6">
-//       <h2 className="text-3xl font-black text-center mb-10 dark:text-white">요청 사항</h2>
-      
-//       <div className="border-4 border-black dark:border-gray-700 bg-white dark:bg-gray-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] overflow-hidden">
-//         <table className="w-full border-collapse">
-//           <thead>
-//             <tr>
-//               <TableHead className="w-20 dark:text-white">No.</TableHead>
-//               <TableHead className="dark:text-white">내용</TableHead>
-//               <TableHead className="dark:text-white w-40 border-r-0">작성일자</TableHead>
-//             </tr>
-//           </thead>
-//           <tbody className="dark:text-white">
-//             {dummyRequests.map((req) => (
-//               <RequestRow key={req.id} no={req.id} content={req.content} date={req.date} />
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       <div className="flex justify-end mt-6">
-//         <Button 
-//           onClick = {() => router.push("/request/new")}
-//           className="px-8 py-3 bg-white text-black border-2 border-black hover:bg-gray-100 ">
-//           글쓰기
-//         </Button>
-//       </div>
-//     </section>
-//   );
-// }
-
-
 "use client"
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation"; // 💡 파라미터 추적용 수입
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import Button from "@/components/atoms/Button";
@@ -60,7 +12,7 @@ interface RequestPost {
   title : string;
   content : string;
   status : string;
-  user : string; // 작성자 정보 (이메일 혹은 ID가 적재되는 필드)
+  user : string;
   date: string;
   email: string;
 }
@@ -70,7 +22,6 @@ export default function RequestBoard() {
   const searchParams = useSearchParams();
   const { data: session } = useSession();
 
-  // URL 주소창에 ?filter=mine 이 붙어있는지 확인하는 가드 정책
   const isMineFilter = searchParams.get("filter") === "mine";
 
   const [requests, setRequests] = useState<RequestPost[]>([]);
@@ -93,8 +44,6 @@ export default function RequestBoard() {
     fetchRequests();
   }, []);
 
-
-  // 💡 [개인 필터링 엔진] '내가 쓴 글' 모드일 때는 세션 이메일과 매칭되는 글만 솎아냅니다.
   const displayedRequests = isMineFilter && session?.user?.email
     ? requests.filter((req) => req.email === session.user.email)
     : requests;
@@ -115,8 +64,6 @@ export default function RequestBoard() {
       
       <div className="bg-white border border-zinc-100 rounded-2xl shadow-sm overflow-hidden">
         
-        {/* 💡 [공간 재배치 1] 무의미한 균등 배분을 깨고, 제목 영역에 최대 실크로드를 열어줍니다. */}
-        {/* <div className="grid grid-cols-[60px_1fr_120px_100px] items-center py-4 px-5 bg-zinc-50/60 border-b border-zinc-100 text-zinc-500 font-semibold text-xs md:text-sm text-left gap-4"> */}
         <div className="hidden md:grid grid-cols-[60px_1fr_120px_100px] items-center py-4 px-5 bg-zinc-50/60 border-b border-zinc-100 text-zinc-500 font-semibold text-xs md:text-sm text-left gap-4">
           <span>No.</span>
           <span className="text-zinc-700">내용 (제목)</span>
@@ -151,7 +98,6 @@ export default function RequestBoard() {
       </div>
 
       <div className="flex justify-between items-center pt-2">
-        {/* 전체보기 <-> 내가 쓴 글 빠른 스왑 보조 단추 장착 */}
         {isMineFilter ? (
           <button onClick={() => router.push("/request")} className="text-xs text-zinc-400 hover:text-black underline underline-offset-4 transition-colors">
             전체 요청사항 보러가기

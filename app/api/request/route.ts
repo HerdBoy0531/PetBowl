@@ -1,10 +1,9 @@
-// app/api/request/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth"; // 프로젝트의 NextAuth 설정 경로에 맞게 조정하세요.
+import { authOptions } from "@/lib/auth";
 
-// 📄 [GET] 요청사항 전체 목록 조회
+// [GET] 요청사항 전체 목록 조회
 export async function GET(req: Request) {
   try {
     const requests = await prisma.request.findMany({
@@ -41,12 +40,12 @@ export async function GET(req: Request) {
   }
 }
 
-// 📝 [POST] 새로운 요청사항 등록 (로그인 회원 전용)
+// [POST] 새로운 요청사항 등록 (로그인 회원 전용)
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
 
-    // 🔒 보안 검증 1: 비로그인 유저 차단
+    // 비로그인 유저 차단
     if (!session || !session.user?.id) {
       return NextResponse.json({ message: "로그인이 필요한 서비스입니다." }, { status: 401 });
     }
@@ -62,7 +61,7 @@ export async function POST(req: Request) {
       data: {
         title,
         content,
-        userId: session.user.id, // 서버 세션에 저장된 안전한 고유 ID 바인딩
+        userId: session.user.id,
       },
     });
 
