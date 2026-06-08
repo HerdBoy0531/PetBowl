@@ -2,8 +2,8 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import MyProfileCard from "@/components/molecules/MyProfileCard"; // 분자 수입
-import MyMenuCard from "@/components/molecules/MyMenuCard";       // 분자 수입
+import MyProfileCard from "@/components/molecules/MyProfileCard";
+import MyMenuCard from "@/components/molecules/MyMenuCard";
 import Button from "@/components/atoms/Button";
 
 export default function MyPage() {
@@ -28,16 +28,16 @@ export default function MyPage() {
   return (
     <div className="w-full max-w-4xl mx-auto py-12 px-4 md:px-6 space-y-8 animate-fade-in">
       
-      {/* 1. 상단 프로필 유닛 배출 (분자) */}
+      {/* 상단 프로필 유닛 배출 (분자) */}
       <MyProfileCard 
         user={session?.user as any} 
         onSignOut={() => signOut({ callbackUrl: "/" })} 
       />
 
-      {/* 2. 하단 메뉴 보드 그리드 배출 (분자 재사용) */}
+      {/* 하단 메뉴 보드 그리드 배출 (분자 재사용) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         <MyMenuCard 
-          href="/request?filter=mine" // 💡 단순히 뒤에 ?filter=mine 만 붙여주면 끝!
+          href="/request?filter=mine"
           emoji="📋"
           title="내가 접수한 요청사항"
           description="추가를 요청한 사료나 서비스 건의 내역 및 어드민 처리 현황을 실시간 스캔합니다."

@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import EditProfileForm from "@/components/organisms/EditProfileForm"; // 유기체 임포트
+import EditProfileForm from "@/components/organisms/EditProfileForm";
 import InfoModal from "@/components/molecules/InfoModal";
 
 export default function MyPageEdit() {
@@ -21,7 +21,7 @@ export default function MyPageEdit() {
     return <div className="py-40 text-center text-zinc-400 text-sm animate-pulse">인증 상태 조회 중...</div>;
   }
 
-  // 🔒 비로그인 유저 접근 통제 보안 가드
+  // 비로그인 유저 접근 통제 보안 가드
   if (status === "unauthenticated") {
     router.push("/login");
     return null;
@@ -30,7 +30,7 @@ export default function MyPageEdit() {
   const user = session?.user as any;
   const currentNickname = user?.nickname || user?.name || "";
 
-  // 📡 진짜 데이터베이스에 수정을 때리는 실시간 비동기 핸들러
+  // 진짜 데이터베이스에 수정을 때리는 실시간 비동기 핸들러
   const handleSaveProfile = async (newNickname: string) => {
     const res = await fetch("/api/user/update", {
       method: "PUT",
@@ -40,7 +40,7 @@ export default function MyPageEdit() {
 
     if (!res.ok) throw new Error("프로필 갱신 API 서버 통신 실패");
 
-    // 🔄 NextAuth 세션 내부 가드를 강제 업데이트하여 전역 네비바 동기화
+    // NextAuth 세션 내부 가드를 강제 업데이트하여 전역 네비바 동기화
     await updateSession({ nickname: newNickname });
     
     if (res.status === 200) {
@@ -70,7 +70,7 @@ export default function MyPageEdit() {
         </p>
       </header>
 
-      {/* 💡 유기체 컴포넌트 배출 및 인터랙션 콜백 바인딩 */}
+      {/* 유기체 컴포넌트 배출 및 인터랙션 콜백 바인딩 */}
       <EditProfileForm 
         initialNickname={currentNickname}
         onSave={handleSaveProfile}

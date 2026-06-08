@@ -15,7 +15,6 @@ export default function AnalysisProgressBar({ label, value, unit }: AnalysisProg
           {value}{unit}
         </span>
       </div>
-      {/* 부드러운 인플랫 shadow-inner 스타일 바 */}
       <div className="w-full h-3 bg-zinc-100 rounded-full overflow-hidden relative shadow-inner">
         <div 
           className="h-full bg-black rounded-full transition-all duration-500" 

@@ -1,4 +1,3 @@
-// app/api/request/[id]/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
@@ -8,7 +7,7 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-// 🔍 [GET] 특정 요청글 상세 조회
+// [GET] 특정 요청글 상세 조회
 export async function GET(req: Request, { params }: RouteParams) {
   const { id } = await params;
   const requestId = Number(id);
@@ -35,7 +34,7 @@ export async function GET(req: Request, { params }: RouteParams) {
       content: requestPost.content,
       status: requestPost.status,
       adminNote: requestPost.adminNote,
-      userId: requestPost.userId, // 프론트엔드에서 수정/삭제 버튼 활성화 판단용
+      userId: requestPost.userId,
       user: requestPost.user?.nickname || "알 수 없는 사용자",
       date: requestPost.createdAt.toISOString().split("T")[0],
     });
@@ -45,14 +44,14 @@ export async function GET(req: Request, { params }: RouteParams) {
   }
 }
 
-// 🔄 [PATCH] 요청글 수정 (본인 확인 방어막 탑재)
+// [PATCH] 요청글 수정 (본인 확인 방어막 탑재)
 export async function PATCH(req: Request, { params }: RouteParams) {
   const { id } = await params;
   const requestId = Number(id);
 
   try {
     const session = await getServerSession(authOptions);
-    console.log(session?.user?.id);
+
     if (!session || !session.user?.id) {
       return NextResponse.json({ message: "권한이 없습니다." }, { status: 401 });
     }
@@ -67,13 +66,13 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       return NextResponse.json({ message: "게시글을 찾을 수 없습니다." }, { status: 404 });
     }
 
-    // 🔒 보안 검증 2: 원본 글의 userId와 현재 로그인한 유저의 id 대조 (F12 우회 돌파 무력화)
+    // 원본 글의 userId와 현재 로그인한 유저의 id 대조 (F12 우회 돌파 무력화)
     if (originalPost.userId !== session.user.id) {
       return NextResponse.json({ message: "본인이 작성한 글만 수정할 수 있습니다." }, { status: 403 });
     }
 
     const body = await req.json();
-    const { content } = body; // 제목은 수정 불가 정책이므로 content만 받음
+    const { content } = body;
 
     const updatedPost = await prisma.request.update({
       where: { id: requestId },
@@ -87,7 +86,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
   }
 }
 
-// ❌ [DELETE] 요청글 삭제 (본인 또는 관리자만 가능)
+// [DELETE] 요청글 삭제 (본인 또는 관리자만 가능)
 export async function DELETE(req: Request, { params }: RouteParams) {
   const { id } = await params;
   const requestId = Number(id);
@@ -107,7 +106,7 @@ export async function DELETE(req: Request, { params }: RouteParams) {
       return NextResponse.json({ message: "게시글을 찾을 수 없습니다." }, { status: 404 });
     }
 
-    // 🔒 보안 검증 3: 글쓴이 본인이거나, 어제 확장해둔 계정 권한이 ADMIN인 경우만 통과
+    // 글쓴이 본인이거나, 어제 확장해둔 계정 권한이 ADMIN인 경우만 통과
     const isAuthor = targetPost.userId === session.user.id;
     const isAdmin = session.user.role === "ADMIN";
 

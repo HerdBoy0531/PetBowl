@@ -1,163 +1,3 @@
-// "use client";
-
-// import { useState } from "react";
-// import CompareAddButton from "@/components/atoms/CompareAddButton";
-// import CompareCard from "@/components/molecules/CompareCard";
-// import SearchModal from "@/components/molecules/SearchModal";
-
-// // 비교 슬롯의 최대 개수
-// const MAX_SLOTS = 2;
-
-// export default function ComparePage() {
-//   // 선택된 사료 데이터를 담는 상태
-//   const [selectedFoods, setSelectedFoods] = useState<any[]>([]);
-//   // 모달 열림/닫힘 상태
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-
-//   // 사료 추가 함수 (왼쪽부터 채워짐)
-//   const handleAddFood = (food: any) => {
-//     if (selectedFoods.length < MAX_SLOTS) {
-//       setSelectedFoods([...selectedFoods, food]);
-//     }
-//     setIsModalOpen(false); // 추가 후 모달 닫기
-//   };
-
-//   // 사료 제거 함수
-//   const handleRemoveFood = (index: number) => {
-//     setSelectedFoods(selectedFoods.filter((_, i) => i !== index));
-//   };
-
-//   return (
-//     <main className="min-h-screen pt-24 pb-20 px-4 bg-white dark:bg-black">
-//       <div className="max-w-6xl mx-auto">
-//         <h1 className="text-3xl font-black mb-10 text-center dark:text-white">
-//           사료 비교하기
-//         </h1>
-
-//         {/* 비교 섹션: 2열 그리드 */}
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-4 border-black dark:border-gray-800 divide-x-4 divide-black dark:divide-gray-800 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] dark:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.1)]">
-//           {[...Array(MAX_SLOTS)].map((_, index) => (
-//             <div 
-//               key={index} 
-//               className="min-h-[600px] flex items-center justify-center bg-white dark:bg-gray-900 overflow-hidden"
-//             >
-//               {selectedFoods[index] ? (
-//                 // 사료 데이터가 있는 경우 카드 표시
-//                 <CompareCard 
-//                   name={selectedFoods[index].name} 
-//                   nutrients={selectedFoods[index].nutrients} 
-//                   onRemove={() => handleRemoveFood(index)}
-//                 />
-//               ) : (
-//                 // 데이터가 없는 경우 추가 버튼 표시
-//                 <CompareAddButton onClick={() => setIsModalOpen(true)} />
-//               )}
-//             </div>
-//           ))}
-//         </div>
-
-//         {/* 안내 문구 */}
-//         <p className="mt-8 text-center text-gray-500 dark:text-gray-400 font-medium">
-//           최대 2개의 사료를 선택하여 영양 성분을 한눈에 비교해보세요.
-//         </p>
-//       </div>
-
-//       {/* 검색 및 추가 모달 */}
-//       <SearchModal 
-//         isOpen={isModalOpen} 
-//         onClose={() => setIsModalOpen(false)} 
-//         onAdd={handleAddFood}
-//       />
-//     </main>
-//   );
-// }
-
-
-// design renewal
-// "use client";
-
-// import { useState } from "react";
-// import CompareAddButton from "@/components/atoms/CompareAddButton";
-// import CompareCard from "@/components/molecules/CompareCard";
-// import SearchModal from "@/components/molecules/SearchModal";
-
-// // 비교 슬롯의 최대 개수
-// const MAX_SLOTS = 2;
-
-// export default function ComparePage() {
-//   // 선택된 사료 데이터를 담는 상태
-//   const [selectedFoods, setSelectedFoods] = useState<any[]>([]);
-//   // 모달 열림/닫힘 상태
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-
-//   // 사료 추가 함수 (왼쪽부터 채워짐)
-//   const handleAddFood = (food: any) => {
-//     if (selectedFoods.length < MAX_SLOTS) {
-//       setSelectedFoods([...selectedFoods, food]);
-//     }
-//     setIsModalOpen(false); // 추가 후 모달 닫기
-//   };
-
-//   // 사료 제거 함수
-//   const handleRemoveFood = (index: number) => {
-//     setSelectedFoods(selectedFoods.filter((_, i) => i !== index));
-//   };
-
-//   return (
-//     // 미니멀 오가닉 포인트: 전역 layout.tsx의 인프라를 활용하고, 부드러운 entry 애니메이션 적용
-//     <div className="space-y-10 pb-12 animate-fade-in">
-      
-//       {/* 1. 헤더 영역: 과도한 두께를 줄이고 정갈한 자간 정돈 */}
-//       <header className="text-center space-y-2">
-//         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black">
-//           사료 비교하기
-//         </h1>
-//         <p className="text-sm text-zinc-500 font-light">
-//           최대 2개의 사료를 선택하여 영양 성분 비율과 특징을 한눈에 대조해보세요.
-//         </p>
-//       </header>
-
-//       {/* 2. 비교 섹션: 투박하게 결합된 블랙 그리드 전면 타파 -> 독립된 부드러운 카드 그리드로 개편 */}
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//         {[...Array(MAX_SLOTS)].map((_, index) => (
-//           <div 
-//             key={index} 
-//             className="min-h-[520px] flex flex-col items-center justify-center bg-white border border-zinc-100 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 p-6 overflow-hidden relative"
-//           >
-//             {selectedFoods[index] ? (
-//               // 사료 데이터가 있는 경우 카드 표시
-//               <CompareCard 
-//                 name={selectedFoods[index].name} 
-//                 nutrients={selectedFoods[index].nutrients} 
-//                 onRemove={() => handleRemoveFood(index)}
-//               />
-//             ) : (
-//               // 데이터가 없는 경우 추가 레이아웃 (오가닉 넘버 가이드 및 버튼 배치)
-//               <div className="flex flex-col items-center justify-center space-y-3 text-center">
-//                 {/* 배경에 은은하게 녹아드는 슬롯 번호 디테일 */}
-//                 <span className="text-[56px] font-black text-zinc-500/5 select-none absolute top-4 left-6">
-//                   0{index + 1}
-//                 </span>
-//                 <CompareAddButton onClick={() => setIsModalOpen(true)} />
-//                 <p className="text-xs text-zinc-400 font-light">비교할 사료를 추가해 주세요</p>
-//               </div>
-//             )}
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* 3. 검색 및 추가 모달 */}
-//       <SearchModal 
-//         isOpen={isModalOpen} 
-//         onClose={() => setIsModalOpen(false)} 
-//         onAdd={handleAddFood}
-//       />
-      
-//     </div>
-//   );
-// }
-
-
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
@@ -169,7 +9,7 @@ import InfoModal from "@/components/molecules/InfoModal";
 
 const MAX_SLOTS = 2;
 
-// 🎯 영양소 한글 번역 사전 (백엔드 명세가 매칭되면 한글로 치환)
+// 영양소 한글 번역 사전 (백엔드 명세가 매칭되면 한글로 치환)
 const nutrientsMap: Record<string, string> = {
   crudeProtein: "조단백질",
   crudeFat: "조지방",
@@ -320,7 +160,7 @@ const compareNutrients = (
   });
 };
 
-// 🔬 [자율 키 스캔 엔진] 어떤 필드명으로 오든 성분 수치를 강제로 솎아내는 방어 함수
+// 어떤 필드명으로 오든 성분 수치를 강제로 솎아내는 방어 함수
 function parseAnalysisData(rawFood: any) {
   if (!rawFood) return [];
   
@@ -328,7 +168,7 @@ function parseAnalysisData(rawFood: any) {
   const analysis = rawFood.analysis || rawFood.guaranteedAnalysis || rawFood.GuaranteedAnalysis;
   if (!analysis) return [];
 
-  // Case A: 중괄호 일반 객체 구조일 때 {}
+  // 중괄호 일반 객체 구조일 때 {}
   if (typeof analysis === "object" && !Array.isArray(analysis)) {
     return Object.entries(analysis)
       .filter(([key, value]) =>
@@ -347,7 +187,7 @@ function parseAnalysisData(rawFood: any) {
       });
   }
 
-  // Case B: 대괄호 배열 구조일 때 []
+  // 대괄호 배열 구조일 때 []
   if (Array.isArray(analysis)) {
     return analysis.map((item: any) => ({
       label: item.label || item.nutrientType || "기타성분",
@@ -407,8 +247,6 @@ function CompareContent() {
   const leftFood = compareFoods ? compareFoods[0] : null;
   const rightFood = compareFoods ? compareFoods[1] : null;
 
-  console.log(leftFood);
-
   const leftParsedNutrients =
   parseAnalysisData(leftFood);
 
@@ -431,10 +269,7 @@ function CompareContent() {
         )
       : rightParsedNutrients;
 
-
-
-
-  // 💡 3. 모달에서 추가 시 실시간 단독 상세 fetch 및 가공 바인딩
+  // 모달에서 추가 시 실시간 단독 상세 fetch 및 가공 바인딩
   const handleAddFood = async (lightFood: any) => {
     if (!lightFood?.id) return;
     
@@ -443,13 +278,9 @@ function CompareContent() {
       if (!res.ok) throw new Error("상세 정보 fetch 실패");
       
       const fullFood = await res.json();
-      console.log("🔥 [비교창] DB에서 실시간 파싱해온 사료 원본:", fullFood);
 
-      // 업그레이드된 자율 키 스캔 파싱 가동 (전체 데이터를 전달)
+      // 업그레이드된 자율 키 스캔 파싱 가동
       const formattedNutrients = parseAnalysisData(fullFood);
-      console.log("✨ 정제가 완료된 영양성분 결과 배열:", formattedNutrients);
-
-      console.log(fullFood);
       
       const compareFood = {
         id: Number(fullFood.id),
@@ -526,9 +357,6 @@ function CompareContent() {
   return (
     <div className="space-y-10 pb-12 animate-fade-in w-full">
       <header className="text-center space-y-2">
-        {/* <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black">
-          사료 비교하기
-        </h1> */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-zinc-900">
             사료 비교
@@ -540,9 +368,6 @@ function CompareContent() {
 
 
         </div>
-        {/* <p className="text-sm text-zinc-500 font-light">
-          최대 2개의 사료를 선택하여 영양 성분 비율과 특징을 한눈에 대조해보세요.
-        </p> */}
       </header>
 
       <div className="flex items-center justify-between mt-4">
@@ -576,8 +401,6 @@ function CompareContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[...Array(MAX_SLOTS)].map((_, index) => {
             const foodItem = compareFoods ? compareFoods[index] : null;
-
-            console.log(foodItem);
 
             return (
               <div 

@@ -1,62 +1,3 @@
-// "use client";
-// import { useState } from "react";
-// import NutrientArrow from "@atoms/NutrientArrow";
-
-// interface NutrientItemProps {
-//   title: string;
-//   description: string;
-//   details: string;
-//   links?: { label: string; url: string }[];
-// }
-
-// export default function NutrientItem({ title, description, details, links }: NutrientItemProps) {
-//   const [isOpen, setIsOpen] = useState(false);
-
-//   return (
-//     <div className="border border-black dark:border-gray-700 mb-4 overflow-hidden bg-white dark:bg-gray-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]">
-//       {/* 요약 섹션 (클릭 영역) */}
-//       <div
-//         className="flex justify-between items-center p-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-//         onClick={() => setIsOpen(!isOpen)}
-//       >
-//         <div className="text-lg font-bold text-black dark:text-white">
-//           {title} : <span className="font-normal ml-2">{description}</span>
-//         </div>
-//         <NutrientArrow isOpen={isOpen} />
-//       </div>
-
-//       {/* 상세 설명 섹션 (아코디언) */}
-//       <div
-//         className={`transition-all duration-300 ease-in-out border-t border-black dark:border-gray-700 ${
-//           isOpen ? "max-h-[500px] p-6 opacity-100" : "max-h-0 p-0 opacity-0"
-//         } overflow-hidden bg-gray-50 dark:bg-gray-800/50`}
-//       >
-//         <div className="text-black dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
-//           <p className="font-bold mb-2">상세 설명</p>
-//           <p className="mb-4">{details}</p>
-          
-//           {links && links.length > 0 && (
-//             <div className="mt-4">
-//               <p className="font-bold mb-2">증명 논문들(링크)</p>
-//               <ul className="list-disc ml-5 space-y-1">
-//                 {links.map((link, idx) => (
-//                   <li key={idx}>
-//                     <a href={link.url} className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800">
-//                       {link.label}
-//                     </a>
-//                   </li>
-//                 ))}
-//               </ul>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
 "use client";
 
 import { useState } from "react";
@@ -75,20 +16,19 @@ export default function NutrientItem({ title, description, details, links }: Nut
   return (
     <div className="bg-white border border-zinc-100 rounded-2xl mb-4 overflow-hidden shadow-sm hover:shadow-md hover:border-zinc-200 transition-all duration-200 w-full">
       
-      {/* 요약 섹션 (클릭 영역: items-center 레이아웃 적용으로 세로 정중앙 정렬 완수) */}
+      {/* 요약 섹션 */}
       <div
         className="flex justify-between items-center p-5 md:p-6 cursor-pointer hover:bg-zinc-50/50 transition-colors select-none gap-6"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {/* 💡 sm:items-center 가드로 좌우 컴포넌트의 높이 균형을 완벽히 맞춥니다. */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8 flex-1 min-w-0">
           
-          {/* A. 이름 구획 (고정 너비 기둥) */}
+          {/* 이름 구획 (고정 너비 기둥) */}
           <div className="text-base md:text-lg font-bold text-zinc-900 sm:w-44 md:w-48 flex-shrink-0">
             {title}
           </div>
           
-          {/* B. 요약 설명 구획 (세로 중앙 배치 완료) */}
+          {/* 요약 설명 구획 (세로 중앙 배치 완료) */}
           <div className="flex-1 min-w-0">
             <p className="text-sm md:text-base font-light text-zinc-500 leading-relaxed">
               {description}
@@ -115,7 +55,6 @@ export default function NutrientItem({ title, description, details, links }: Nut
             <p className="text-zinc-600 leading-relaxed font-light whitespace-pre-line">{details}</p>
           </div>
           
-          {/* 💡 5편의 리치한 참고 자료 및 증명 논문 링크 아카이브 */}
           {links && links.length > 0 && (
             <div className="pt-5 border-t border-t-zinc-200/60">
               <p className="font-semibold text-zinc-400 mb-3 text-xs tracking-wider uppercase">참고 자료 및 증명 논문 (5개 출처)</p>

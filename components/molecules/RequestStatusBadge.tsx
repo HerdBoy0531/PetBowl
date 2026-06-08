@@ -45,7 +45,7 @@ export default function RequestStatusBadge({ requestId, currentStatus, isAdmin }
     className: "bg-zinc-50 text-zinc-400 border-zinc-100",
   };
 
-  // 👑 Case A: 로그인 계정이 ADMIN 마스터일 때 ➔ 셀렉트 드롭다운 가판대 개전
+  // 로그인 계정이 ADMIN 마스터일 때 ➔ 셀렉트 드롭다운 가판대 개전
   if (isAdmin) {
     return (
       <select

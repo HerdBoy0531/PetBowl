@@ -11,10 +11,10 @@ export default function HomePage() {
       <Navbar />
       
       <main className="flex-grow pt-16">
-        {/* 1. 히어로 캐러셀 섹션 */}
+        {/* 히어로 캐러셀 섹션 */}
         <HeroSection />
 
-        {/* 2. 원하는 사료 검색 섹션 */}
+        {/* 원하는 사료 검색 섹션 */}
         <section className="py-24 flex flex-col items-center px-4">
           <h2 className="text-2xl md:text-3xl font-black mb-12 text-black dark:text-white">
             원하는 사료 검색
@@ -22,7 +22,7 @@ export default function HomePage() {
           <SearchBar />
         </section>
 
-        {/* 3. 인기 사료 랭킹 섹션 */}
+        {/* 인기 사료 랭킹 섹션 */}
         <PopularSection />
       </main>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Badge from "@atoms/Badge"; // 기존에 만든 Badge 활용
+import Badge from "@atoms/Badge";
 
 interface FoodCardProps {
   name: string;

@@ -14,7 +14,6 @@ export default function EditProfileForm({ initialNickname, onSave, onCancel }: E
   const [nickname, setNickname] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 부모 세션에서 뒤늦게 복구된 초기 이름을 내부 인풋 상태에 동기화
   useEffect(() => {
     setNickname(initialNickname);
   }, [initialNickname]);
@@ -25,7 +24,6 @@ export default function EditProfileForm({ initialNickname, onSave, onCancel }: E
 
     setIsSubmitting(true);
     try {
-      // 💡 핵심: 상위 지휘탑(Page)이 내려준 비동기 저장 파이프라인 트리거
       await onSave(nickname.trim()); 
     } catch (error) {
       console.error("폼 컴포넌트 내 전송 크래시:", error);
