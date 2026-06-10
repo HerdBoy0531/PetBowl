@@ -1,4 +1,7 @@
 import "./globals.css";
+
+import Script from "next/script";
+
 import AuthContext from "@/components/providers/SessionProvider";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
@@ -35,6 +38,32 @@ export default function RootLayout({
           {/* 비교 바구니 */}
           <GlobalCompareDock />
         </AuthContext>
+
+        {/* Microsoft clarity */}
+        <Script id="clarity" strategy="afterInteractive">
+          {`
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "x4xi8m6khb");
+          `}
+        </Script>
+
+        {/* Google Analytics 4 */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-DMFHN2YK9S"
+          strategy="afterInteractive"
+        />
+
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-DMFHN2YK9S');
+          `}
+        </Script>
       </body>
     </html>
   );

@@ -64,11 +64,11 @@ export default function LoginPage() {
         </div>
 
         <button
-          onClick={() => signIn("google", { callbackUrl: "/public/google-logo.svg" })}
+          onClick={() => signIn("google", { callbackUrl: "/" })}
           className="w-full bg-white text-black border border-gray-200 py-4 rounded-2xl font-medium flex items-center justify-center gap-2 hover:bg-gray-50 transition-all"
         >
 
-          <img src="public/google-logo.png" alt="Google" className="w-5 h-5" />
+          <img src="/google-logo2.svg" alt="Google" className="w-6 h-6 object-contain" />
           Google로 시작하기
         </button>
 
