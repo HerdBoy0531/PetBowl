@@ -40,7 +40,7 @@ export default function RootLayout({
         </AuthContext>
 
         {/* Microsoft clarity */}
-        <Script id="clarity" strategy="afterInteractive">
+        <Script id="microsoft-clarity" strategy="afterInteractive">
           {`
             (function(c,l,a,r,i,t,y){
                 c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
