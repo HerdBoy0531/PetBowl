@@ -144,25 +144,25 @@ PetBowl
 ## 📸 서비스 화면
 
 ### 메인 페이지
-![alt text](image.png)
-![alt text](image-1.png)
+![alt text](/public/siteImage/image.png)
+![alt text](/public/siteImage/image-1.png)
 
 ### 사료 검색 페이지
-![alt text](image-2.png)
+![alt text](/public/siteImage/image-2.png)
 
 ### 사료 상세 페이지
-![alt text](image-3.png)
-![alt text](image-4.png)
+![alt text](/public/siteImage/image-3.png)
+![alt text](/public/siteImage/image-4.png)
 
 ### 사료 비교 페이지
-![alt text](image-6.png)
-![alt text](image-5.png)
+![alt text](/public/siteImage/image-6.png)
+![alt text](/public/siteImage/image-5.png)
 
 ### 요청사항 페이지
-![alt text](image-7.png)
+![alt text](/public/siteImage/image-7.png)
 
 ### 마이페이지
-![alt text](image-8.png)
+![alt text](/public/siteImage/image-8.png)
 
 ---
 
