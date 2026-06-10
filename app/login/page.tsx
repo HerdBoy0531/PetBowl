@@ -64,7 +64,7 @@ export default function LoginPage() {
         </div>
 
         <button
-          onClick={() => signIn("google", { callbackUrl: "/google-logo.svg" })}
+          onClick={() => signIn("google", { callbackUrl: "/public/google-logo.svg" })}
           className="w-full bg-white text-black border border-gray-200 py-4 rounded-2xl font-medium flex items-center justify-center gap-2 hover:bg-gray-50 transition-all"
         >
 
