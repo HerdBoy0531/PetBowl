@@ -68,7 +68,7 @@ export default function LoginPage() {
           className="w-full bg-white text-black border border-gray-200 py-4 rounded-2xl font-medium flex items-center justify-center gap-2 hover:bg-gray-50 transition-all"
         >
 
-          <img src="/google-logo.png" alt="Google" className="w-5 h-5" />
+          <img src="public/google-logo.png" alt="Google" className="w-5 h-5" />
           Google로 시작하기
         </button>
 
